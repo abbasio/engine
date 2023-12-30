@@ -1,0 +1,14 @@
+libs/glm/*
+!libs/glm/.gitkeep
+
+libs/imgui/*
+!libs/imgui/.gitkeep
+
+libs/lua/*
+!libs/lua/.gitkeep
+
+libs/sol/*
+!libs/sol/.gitkeep
+
+assets/*
+!assets/.gitkeep
