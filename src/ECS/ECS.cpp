@@ -4,10 +4,12 @@
 
 using namespace std;
 
+//--------ENTITY
 int Entity::GetId() const{
     return id;
 }
 
+//--------SYSTEM
 void System::AddEntityToSystem(Entity entity){
     entities.push_back(entity);
 }
@@ -24,6 +26,7 @@ const Signature& System::GetComponentSignature() const{
     return componentSignature;
 }
 
+//--------REGISTRY
 Entity Registry::CreateEntity(){
     int entityId;
 

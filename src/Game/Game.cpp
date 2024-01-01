@@ -1,10 +1,11 @@
-#include "Game.h"
-#include "../Logger/Logger.h"
-#include "../ECS/ECS.h"
-#include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include "../../libs/glm/glm.hpp"
+#include <SDL2/SDL.h>
 #include <iostream>
+
+#include "../../libs/glm/glm.hpp"
+#include "../ECS/ECS.h"
+#include "../Logger/Logger.h"
+#include "Game.h"
 
 Game::Game(){
     isRunning = false;
