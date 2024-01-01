@@ -5,6 +5,7 @@
 #include <set>
 #include <unordered_map>
 #include <typeindex>
+#include <memory>
 
 using namespace std;
 
@@ -141,23 +142,36 @@ class Registry{
 
         void Update();
         
+        // Entity management        
         Entity CreateEntity(); 
-
+        
+        // Component management
         template <typename TComponent, typename ...TArgs> void AddComponent(Entity entity, TArgs&& ...args);
         template <typename TComponent> void RemoveComponent(Entity entity);
-        template <typename TComponent> bool HasComponent(Entity entity);
+        template <typename TComponent> bool HasComponent(Entity entity) const;
         
-        void AddEntityToSystem(Entity entity);
+        // System management
+        template <typename TSystem, typename ...TArgs> void AddSystem(TArgs&& ...args);
+        template <typename TSystem> void RemoveSystem();
+        template <typename TSystem> bool HasSystem() const;  
+        template <typename TSystem> TSystem& GetSystem() const;  
+        
+        // Checks component signature of an entity
+        // adds entity to the systems that are interested in it
+        void AddEntityToSystems(Entity entity);
 
 };
 
 //--------TEMPLATES
+
+// System
 template <typename TComponent>
 void System::RequireComponent(){
     const auto componentId = Component<TComponent>::GetId();
     componentSignature.set(componentId);
 }
 
+// Registry
 template<typename TComponent, typename ...TArgs>
 void Registry::AddComponent(Entity entity, TArgs&& ...args){
     const auto componentId = Component<TComponent>::GetId();
@@ -201,11 +215,37 @@ void Registry::RemoveComponent(Entity entity){
 }
 
 template<typename TComponent>
-bool Registry::HasComponent(Entity entity){
+bool Registry::HasComponent(Entity entity) const{
     const auto componentId = Component<TComponent>::GetId();
     const auto entityId = entity.GetId();
 
     return entityComponentSignatures[entityId].test(componentId); 
 }
 
+template <typename TSystem, typename ...TArgs> 
+void Registry::AddSystem(TArgs&& ...args){
+    // Create a new system using the constructor 
+    TSystem* newSystem(new TSystem(forward<TArgs>(args)...));
+    // Add a new key/value pair to the unordered map of systems
+    systems.insert(make_pair(type_index(typeid(TSystem)), newSystem));
+
+}
+
+template <typename TSystem> 
+void Registry::RemoveSystem(){
+    auto system = systems.find(type_index(typeid(TSystem)));   
+    systems.erase(system);
+}
+
+template <typename TSystem> 
+bool Registry::HasSystem() const{
+    return systems.find(type_index(typeid(TSystem))) != systems.end(); 
+}
+
+template <typename TSystem> 
+TSystem& Registry::GetSystem() const{
+    auto system = systems.find(type_index(typeid(TSystem)));
+    // Get the value from the key as static pointer cast of the type TSystem
+    return *(static_pointer_cast<TSystem>(system -> second));    
+}
 

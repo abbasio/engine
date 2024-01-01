@@ -9,6 +9,9 @@ int Entity::GetId() const{
     return id;
 }
 
+//--------COMPONENT
+int IComponent::nextId = 0;
+
 //--------SYSTEM
 void System::AddEntityToSystem(Entity entity){
     entities.push_back(entity);
@@ -40,6 +43,25 @@ Entity Registry::CreateEntity(){
     return entity;
 }
 
+void Registry::AddEntityToSystems(Entity entity){
+    const auto entityId = entity.GetId();
+
+    // Get entity component signature
+    const auto& entityComponentSignature = entityComponentSignatures[entityId];
+
+    // Loop over all systems to get system component signatures
+    for (auto& system: systems){
+        const auto& systemComponentSignature = system.second -> GetComponentSignature();
+        
+        // Use the bitwise& operator to check if the signatures match
+        bool isInterested = (entityComponentSignature & systemComponentSignature) == systemComponentSignature;
+        
+        // Add entity to the system if the signatures match
+        if (isInterested){
+            system.second -> AddEntityToSystem(entity);
+        }
+    }
+}
 
 void Registry::Update(){
     
