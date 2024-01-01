@@ -10,7 +10,7 @@ SRC_FILES = ./src/*.cpp \
 LINKER_FLAGS = -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -llua 
 OBJ_NAME = engine
 
-## Defined Makefile rules
+## Define Makefile rules
 build:
 	$(CC) $(COMPILER_FLAGS) $(LANG_STD) $(INCLUDE_PATH) $(SRC_FILES) $(LINKER_FLAGS) -o $(OBJ_NAME)
 
