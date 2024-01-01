@@ -25,6 +25,7 @@ class Entity{
         int GetId() const;
         // Custom operator to check if two entities are equal to one another
         bool operator ==(const Entity& entity) const { return GetId() == entity.GetId(); }
+        bool operator <(const Entity& entity) const { return GetId() < entity.GetId(); }
 };
 
 //--------COMPONENT
@@ -137,6 +138,7 @@ class Registry{
         // Set of entities that are flagged to be added or removed in the next registry update()
         set<Entity> entitiesToBeAdded;
         set<Entity> entitiesToBeKilled;
+
     public:
         Registry() = default;
 
