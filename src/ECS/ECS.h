@@ -124,7 +124,7 @@ class Registry{
         // Each pool contains all the data for a certain component type
         // [index = component type id]
         // [Pool index = entity id]
-        vector<IPool*> componentPools;
+        vector<shared_ptr<IPool>> componentPools;
 
         // Vector of component signatures
         // The signatures let us know which components are 'on' for an entity
@@ -133,7 +133,7 @@ class Registry{
 
         // Map of active systems 
         // [index = system typeId]
-        unordered_map<type_index, System*> systems;
+        unordered_map<type_index, shared_ptr<System>> systems;
         
         // Set of entities that are flagged to be added or removed in the next registry update()
         set<Entity> entitiesToBeAdded;
@@ -186,12 +186,12 @@ void Registry::AddComponent(Entity entity, TArgs&& ...args){
 
     // Add pool for given component type if it doesn't exist
     if(!componentPools[componentId]){
-        Pool<TComponent>* newComponentPool = new Pool<TComponent>;
+        shared_ptr<Pool<TComponent>> newComponentPool = make_shared<Pool<TComponent>>();
         componentPools[componentId] = newComponentPool;
     }
 
     // Get the pool of component values for the given component type
-    Pool<TComponent>* componentPool = Pool<TComponent>(componentPools[componentId]);
+    shared_ptr<Pool<TComponent>> componentPool = static_pointer_cast<Pool<TComponent>>(componentPools[componentId]);
 
     // Resize componentPool vector if needed
     if(entityId >= componentPool -> GetSize()){
@@ -227,7 +227,7 @@ bool Registry::HasComponent(Entity entity) const{
 template <typename TSystem, typename ...TArgs> 
 void Registry::AddSystem(TArgs&& ...args){
     // Create a new system using the constructor 
-    TSystem* newSystem(new TSystem(forward<TArgs>(args)...));
+    shared_ptr<TSystem> newSystem = make_shared<TSystem>(forward<TArgs>(args)...);
     // Add a new key/value pair to the unordered map of systems
     systems.insert(make_pair(type_index(typeid(TSystem)), newSystem));
 

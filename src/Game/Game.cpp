@@ -9,6 +9,7 @@
 
 Game::Game(){
     isRunning = false;
+    registry = std::make_unique<Registry>(); 
     Logger::Log("Game constructor called!"); 
 }
 
@@ -69,11 +70,8 @@ void Game::ProcessInput(){
 
 
 void Game::Setup(){
-    //TODO: 
-    //Entity tank = registry.CreateEntity();
-    //tank.AddComponent<TransformComponent>();
-    //tank.AddComponent<BoxColliderComponent>();
-    //tank.AddComponent<SpriteComponent>("./assets/images/tank.png");
+    Entity tank = registry -> CreateEntity();
+    Entity truck = registry -> CreateEntity();
 }
 
 void Game::Update(){
