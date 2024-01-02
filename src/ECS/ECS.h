@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <typeindex>
 #include <memory>
+#include "../Logger/Logger.h"
 
 using namespace std;
 
@@ -37,10 +38,11 @@ struct IComponent{
 // Assign a unique ID to each component type
 template<typename T>
 class Component: public IComponent{
-    // Returns the unique ID of Component<T>
-    static int GetId(){
-        static auto id = nextId++;
-        return id;
+    public:
+        // Returns the unique ID of Component<T>
+        static int GetId(){
+            static auto id = nextId++;
+            return id;
     }
 };
 
@@ -194,7 +196,7 @@ void Registry::AddComponent(Entity entity, TArgs&& ...args){
     shared_ptr<Pool<TComponent>> componentPool = static_pointer_cast<Pool<TComponent>>(componentPools[componentId]);
 
     // Resize componentPool vector if needed
-    if(entityId >= componentPool -> GetSize()){
+    if(entityId >= componentPool -> getSize()){
         componentPool -> Resize(numEntities);
     }
 
@@ -206,6 +208,8 @@ void Registry::AddComponent(Entity entity, TArgs&& ...args){
 
     // Finally, change the component signature of the entity and set the component id on the bitset to 1
     entityComponentSignatures[entityId].set(componentId);
+
+    Logger::Log("Component ID = " + to_string(componentId) + " was added to entity ID " + to_string(entityId));
 }
 
 template<typename TComponent>
