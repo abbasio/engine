@@ -27,6 +27,14 @@ class Entity{
         // Custom operator to check if two entities are equal to one another
         bool operator ==(const Entity& entity) const { return GetId() == entity.GetId(); }
         bool operator <(const Entity& entity) const { return GetId() < entity.GetId(); }
+
+        template <typename TComponent, typename ...TArgs> void AddComponent(TArgs&& ...args);
+        template <typename TComponent> void RemoveComponent();
+        template <typename TComponent> bool  HasComponent() const;
+        template <typename TComponent> TComponent& GetComponent() const;
+
+        //Hold a pointer to the entity's owner registr
+        class Registry* registry;
 };
 
 //--------COMPONENT
@@ -153,6 +161,7 @@ class Registry{
         template <typename TComponent, typename ...TArgs> void AddComponent(Entity entity, TArgs&& ...args);
         template <typename TComponent> void RemoveComponent(Entity entity);
         template <typename TComponent> bool HasComponent(Entity entity) const;
+        template <typename TComponent> TComponent& GetComponent(Entity entity) const;
         
         // System management
         template <typename TSystem, typename ...TArgs> void AddSystem(TArgs&& ...args);
@@ -168,6 +177,27 @@ class Registry{
 
 //--------TEMPLATES
 
+// Entity
+template<typename TComponent, typename ...TArgs>
+void Entity::AddComponent(TArgs&& ...args){
+    registry -> AddComponent<TComponent>(*this, forward<TArgs>(args)...);
+}
+
+template<typename TComponent>
+void Entity::RemoveComponent(){
+    registry -> RemoveComponent<TComponent>(*this);
+}
+
+template<typename TComponent>
+bool Entity::HasComponent() const{
+    return registry -> HasComponent<TComponent>(*this);
+}
+
+template <typename TComponent> 
+TComponent& Entity::GetComponent() const{
+    return registry -> GetComponent<TComponent>(*this);
+}
+
 // System
 template <typename TComponent>
 void System::RequireComponent(){
@@ -182,7 +212,7 @@ void Registry::AddComponent(Entity entity, TArgs&& ...args){
     const auto entityId = entity.GetId();
     
     // Resize componentPools vector if needed
-    if(componentId >= componentPools.size()){
+    if(componentId >= static_cast<int>(componentPools.size())){
         componentPools.resize(componentId + 1, nullptr);
     }
 
@@ -218,6 +248,8 @@ void Registry::RemoveComponent(Entity entity){
     const auto entityId = entity.GetId();
 
     entityComponentSignatures[entityId].set(componentId, false);
+    
+    Logger::Log("Component ID = " + to_string(componentId) + " was removed from entity ID " + to_string(entityId));
 }
 
 template<typename TComponent>
@@ -226,6 +258,14 @@ bool Registry::HasComponent(Entity entity) const{
     const auto entityId = entity.GetId();
 
     return entityComponentSignatures[entityId].test(componentId); 
+}
+
+template <typename TComponent> 
+TComponent& Registry::GetComponent(Entity entity) const{
+    const auto componentId = Component<TComponent>::GetId();
+    const auto entityId = entity.GetId();
+    auto componentPool = static_pointer_cast<Pool<TComponent>>(componentPools[componentId]);
+    return componentPool -> Get(entityId);
 }
 
 template <typename TSystem, typename ...TArgs> 

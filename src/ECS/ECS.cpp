@@ -36,10 +36,12 @@ Entity Registry::CreateEntity(){
     entityId = numEntities++;
 
     Entity entity(entityId);
+    // Set the entry's parent registry to the current registry
+    entity.registry = this;
     entitiesToBeAdded.insert(entity);
     
     // Resize entityComponentSignatures vector as needed
-    if (entityId >= entityComponentSignatures.size()){
+    if (entityId >= static_cast<int>(entityComponentSignatures.size())){
         entityComponentSignatures.resize(entityId + 1);
     }
 
