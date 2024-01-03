@@ -4,13 +4,18 @@
 
 using namespace std;
 
-AssetStore::AssetStore(){
+AssetStore::AssetStore(SDL_Renderer* renderer){
+    this -> renderer = renderer;
     Logger::Log("Asset Store constructor called!");
 }
 
 AssetStore::~AssetStore(){
     ClearAssets();
     Logger::Log("Asset Store destructor called!");
+}
+
+void AssetStore::SetRenderer(SDL_Renderer* renderer){
+    this -> renderer = renderer;
 }
 
 void AssetStore::ClearAssets(){
@@ -20,7 +25,7 @@ void AssetStore::ClearAssets(){
     textures.clear();
 }
 
-void AssetStore::AddTexture(SDL_Renderer* renderer, const string& assetId, const string& filePath){
+void AssetStore::AddTexture(const string& assetId, const string& filePath){
     SDL_Surface* surface = IMG_Load(filePath.c_str());
     SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_FreeSurface(surface);

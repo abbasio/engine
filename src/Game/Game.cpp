@@ -13,10 +13,10 @@
 #include "Game.h"
 
 Game::Game(){
+    Logger::Log("Game constructor called!"); 
     isRunning = false;
     registry = std::make_unique<Registry>(); 
-    assetStore = std::make_unique<AssetStore>(); 
-    Logger::Log("Game constructor called!"); 
+    assetStore = std::make_unique<AssetStore>(renderer); 
 }
 
 Game::~Game(){
@@ -53,6 +53,7 @@ void Game::Initialize(){
         Logger::Err("Error creating SDL renderer!"); 
         return;
     }
+    assetStore -> SetRenderer(renderer);
     SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
     isRunning = true;
 }
@@ -74,26 +75,34 @@ void Game::ProcessInput(){
     }
 }
 
-
-void Game::Setup(){
+void Game::LoadLevel(int level){
     // Add the systems that need to be processed in our game
     registry -> AddSystem<MovementSystem>();
     registry -> AddSystem<RenderSystem>();
     // Add assets to the asset store
-    assetStore -> AddTexture(renderer, "tank-right", "./assets/images/tank-panther-right.png");
-    assetStore -> AddTexture(renderer, "truck-right", "./assets/images/truck-ford-right.png");
-    // Create entities
-    Entity wideBoy = registry -> CreateEntity();
-    Entity tallBoy = registry -> CreateEntity();
-    // Add components
-    wideBoy.AddComponent<TransformComponent>(glm::vec2(10.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
-    wideBoy.AddComponent<RigidBodyComponent>(glm::vec2(50.0, 0.0));
-    wideBoy.AddComponent<SpriteComponent>("tank-right", 50, 10);
+    assetStore -> AddTexture("tank-right", "./assets/images/tank-panther-right.png");
+    assetStore -> AddTexture("truck-right", "./assets/images/truck-ford-right.png");
+    // Load tilemap
+    // We need to load tilemap texture from ./assets/tilemaps/jungle.png
+    // We need to load the file ./assets/tilemaps/jungle.map
     
-    tallBoy.AddComponent<TransformComponent>(glm::vec2(50.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
-    tallBoy.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 50.0));
-    tallBoy.AddComponent<SpriteComponent>("truck-image", 10, 50);
+    // Create entities
+    Entity tank = registry -> CreateEntity();
+    Entity truck = registry -> CreateEntity();
+    // Add components
+    tank.AddComponent<TransformComponent>(glm::vec2(10.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
+    tank.AddComponent<RigidBodyComponent>(glm::vec2(50.0, 0.0));
+    tank.AddComponent<SpriteComponent>("tank-right");
+    
+    truck.AddComponent<TransformComponent>(glm::vec2(50.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
+    truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 50.0));
+    truck.AddComponent<SpriteComponent>("truck-right");
 
+
+}
+
+void Game::Setup(){
+    LoadLevel(1);
 }
 
 void Game::Update(){
@@ -118,7 +127,7 @@ void Game::Render(){
     SDL_RenderClear(renderer);
         
     // Invoke all systems that need to render
-    registry -> GetSystem<RenderSystem>().Update(renderer);
+    registry -> GetSystem<RenderSystem>().Update(renderer, assetStore);
   
     SDL_RenderPresent(renderer);
 }
