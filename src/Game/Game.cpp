@@ -15,6 +15,7 @@
 Game::Game(){
     isRunning = false;
     registry = std::make_unique<Registry>(); 
+    assetStore = std::make_unique<AssetStore>(); 
     Logger::Log("Game constructor called!"); 
 }
 
@@ -77,18 +78,21 @@ void Game::ProcessInput(){
 void Game::Setup(){
     // Add the systems that need to be processed in our game
     registry -> AddSystem<MovementSystem>();
-    registry -> AddSystem<RenderSystem>(); 
+    registry -> AddSystem<RenderSystem>();
+    // Add assets to the asset store
+    assetStore -> AddTexture(renderer, "tank-right", "./assets/images/tank-panther-right.png");
+    assetStore -> AddTexture(renderer, "truck-right", "./assets/images/truck-ford-right.png");
     // Create entities
     Entity wideBoy = registry -> CreateEntity();
     Entity tallBoy = registry -> CreateEntity();
     // Add components
     wideBoy.AddComponent<TransformComponent>(glm::vec2(10.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
     wideBoy.AddComponent<RigidBodyComponent>(glm::vec2(50.0, 0.0));
-    wideBoy.AddComponent<SpriteComponent>(50, 10);
+    wideBoy.AddComponent<SpriteComponent>("tank-right", 50, 10);
     
     tallBoy.AddComponent<TransformComponent>(glm::vec2(50.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
     tallBoy.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 50.0));
-    tallBoy.AddComponent<SpriteComponent>(10, 50);
+    tallBoy.AddComponent<SpriteComponent>("truck-image", 10, 50);
 
 }
 
