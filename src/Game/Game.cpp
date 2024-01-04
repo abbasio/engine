@@ -1,6 +1,10 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL.h>
 #include <iostream>
+#include <iterator>
+#include <fstream>
+#include <algorithm>
+#include <sstream>
 
 #include "../../libs/glm/glm.hpp"
 #include "../Components/TransformComponent.h"
@@ -24,6 +28,9 @@ Game::~Game(){
 }
 
 void Game::Initialize(){
+    
+    
+
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         Logger::Err("Error initializing SDL."); 
         return;
@@ -79,12 +86,46 @@ void Game::LoadLevel(int level){
     // Add the systems that need to be processed in our game
     registry -> AddSystem<MovementSystem>();
     registry -> AddSystem<RenderSystem>();
+    
     // Add assets to the asset store
     assetStore -> AddTexture("tank-right", "./assets/images/tank-panther-right.png");
     assetStore -> AddTexture("truck-right", "./assets/images/truck-ford-right.png");
-    // Load tilemap
-    // We need to load tilemap texture from ./assets/tilemaps/jungle.png
-    // We need to load the file ./assets/tilemaps/jungle.map
+    assetStore -> AddTexture("tileset", "./assets/tilemaps/jungle.png");
+    
+    // Create a 2D tilemap vector
+    vector<vector<int>> tileMap;
+    ifstream infile("./assets/tilemaps/jungle.map");
+    std::string line;
+    // Get each line of the map file
+    while(getline(infile, line)){
+        // Write each line into a stringstream
+        stringstream ss(line);
+        vector<int> row;
+        // Get each value from the line, then push it into a 'row' vector
+        while(getline(ss, line, ',')){
+            row.push_back(stoi(line));
+        }
+        // Push each 'row' vector into the 2D tilemap vector
+        tileMap.push_back(row);
+    }
+
+    
+    // Loop over the 2D tileMap vector and create a tile entity for each entry
+    for(int i = 0; i < static_cast<int>(tileMap.size()); i++){
+        for(int j = 0; j < static_cast<int>(tileMap[i].size()); j++){
+            Entity tile = registry -> CreateEntity();
+            // Define the tile locations based on the indices 
+            int tileXPos = j * 32;
+            int tileYPos = i * 32;
+            tile.AddComponent<TransformComponent>(glm::vec2(tileXPos, tileYPos));
+            // Define sprite srcRect based on value
+            // jungle.png is a 10x3 tileset
+            int row = floor(tileMap[i][j] / 10);
+            int srcRectY = row * 32;
+            int srcRectX = (tileMap[i][j] - (row * 10)) * 32;
+            tile.AddComponent<SpriteComponent>("tileset", 32, 32, srcRectX, srcRectY);           
+        }
+    }
     
     // Create entities
     Entity tank = registry -> CreateEntity();
