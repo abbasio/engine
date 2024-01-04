@@ -109,21 +109,23 @@ void Game::LoadLevel(int level){
         tileMap.push_back(row);
     }
 
-    
+    int tileSetWidth = 10;
+    int tileSize = 32;
+    int tileScale = 2; 
     // Loop over the 2D tileMap vector and create a tile entity for each entry
     for(int i = 0; i < static_cast<int>(tileMap.size()); i++){
         for(int j = 0; j < static_cast<int>(tileMap[i].size()); j++){
             Entity tile = registry -> CreateEntity();
             // Define the tile locations based on the indices 
-            int tileXPos = j * 32;
-            int tileYPos = i * 32;
-            tile.AddComponent<TransformComponent>(glm::vec2(tileXPos, tileYPos));
+            int tileXPos = j * tileSize * tileScale;
+            int tileYPos = i * tileSize * tileScale;
+            tile.AddComponent<TransformComponent>(glm::vec2(tileXPos, tileYPos), glm::vec2(tileScale, tileScale));
             // Define sprite srcRect based on value
-            // jungle.png is a 10x3 tileset
-            int row = floor(tileMap[i][j] / 10);
-            int srcRectY = row * 32;
-            int srcRectX = (tileMap[i][j] - (row * 10)) * 32;
-            tile.AddComponent<SpriteComponent>("tileset", 32, 32, srcRectX, srcRectY);           
+            int tileSetRow = floor(tileMap[i][j] / tileSetWidth);
+            int tileSetColumn = (tileMap[i][j] - (tileSetRow * tileSetWidth));
+            int srcRectX = tileSize * tileSetColumn;
+            int srcRectY = tileSize * tileSetRow;
+            tile.AddComponent<SpriteComponent>("tileset", tileSize, tileSize, srcRectX, srcRectY);           
         }
     }
     
