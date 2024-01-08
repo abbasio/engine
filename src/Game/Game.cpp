@@ -7,9 +7,12 @@
 #include <sstream>
 
 #include "../../libs/glm/glm.hpp"
+#include "../Components/BoxColliderComponent.h"
+#include "../Components/AnimationComponent.h"
 #include "../Components/TransformComponent.h"
 #include "../Components/RigidBodyComponent.h"
 #include "../Components/SpriteComponent.h"
+#include "../Systems/AnimationSystem.h"
 #include "../Systems/MovementSystem.h"
 #include "../Systems/RenderSystem.h"
 #include "../ECS/ECS.h"
@@ -28,40 +31,23 @@ Game::~Game(){
 }
 
 void Game::Initialize(){
-    
-    
-
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         Logger::Err("Error initializing SDL."); 
         return;
     }
+
     SDL_DisplayMode displayMode;
     SDL_GetCurrentDisplayMode(0, &displayMode);
-    windowWidth = 800; 
-    windowHeight = 600; 
-    window = SDL_CreateWindow(
-        NULL, 
-        SDL_WINDOWPOS_CENTERED, 
-        SDL_WINDOWPOS_CENTERED,
-        windowWidth,
-        windowHeight,
-        SDL_WINDOW_BORDERLESS 
-    );
-    if (!window){
-        Logger::Err("Error creating SDL window!"); 
-        return;
+    windowWidth = displayMode.w; 
+    windowHeight = displayMode.h;
+    
+    SDL_CreateWindowAndRenderer(windowWidth, windowHeight, SDL_WINDOW_BORDERLESS, &window, &renderer);
+    if (!window || !renderer){
+        Logger::Err("Error creating SDL Window and Renderer!");
     }
-    renderer = SDL_CreateRenderer(
-            window, 
-            -1, 
-            SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
-        );
-    if (!renderer){
-        Logger::Err("Error creating SDL renderer!"); 
-        return;
-    }
+
     assetStore -> SetRenderer(renderer);
-    SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+    SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
     isRunning = true;
 }
 
@@ -86,8 +72,11 @@ void Game::LoadLevel(int level){
     // Add the systems that need to be processed in our game
     registry -> AddSystem<MovementSystem>();
     registry -> AddSystem<RenderSystem>();
-    
+    registry -> AddSystem<AnimationSystem>();
+
     // Add assets to the asset store
+    assetStore -> AddTexture("chopper-image", "./assets/images/chopper.png"); 
+    assetStore -> AddTexture("radar-image", "./assets/images/radar.png"); 
     assetStore -> AddTexture("tank-right", "./assets/images/tank-panther-right.png");
     assetStore -> AddTexture("truck-right", "./assets/images/truck-ford-right.png");
     assetStore -> AddTexture("tileset", "./assets/tilemaps/jungle.png");
@@ -95,15 +84,17 @@ void Game::LoadLevel(int level){
     // Create a 2D tilemap vector
     vector<vector<int>> tileMap;
     ifstream infile("./assets/tilemaps/jungle.map");
-    std::string line;
+    string tileMapString;
+    
     // Get each line of the map file
-    while(getline(infile, line)){
+    while(getline(infile, tileMapString)){
         // Write each line into a stringstream
-        stringstream ss(line);
+        stringstream ss(tileMapString);
+        string tile;
         vector<int> row;
         // Get each value from the line, then push it into a 'row' vector
-        while(getline(ss, line, ',')){
-            row.push_back(stoi(line));
+        while(getline(ss, tile, ',')){
+            row.push_back(stoi(tile));
         }
         // Push each 'row' vector into the 2D tilemap vector
         tileMap.push_back(row);
@@ -125,21 +116,34 @@ void Game::LoadLevel(int level){
             int tileSetColumn = (tileMap[i][j] - (tileSetRow * tileSetWidth));
             int srcRectX = tileSize * tileSetColumn;
             int srcRectY = tileSize * tileSetRow;
-            tile.AddComponent<SpriteComponent>("tileset", tileSize, tileSize, srcRectX, srcRectY);           
+            tile.AddComponent<SpriteComponent>("tileset", 1, tileSize, tileSize, srcRectX, srcRectY);           
         }
     }
     
-    // Create entities
-    Entity tank = registry -> CreateEntity();
-    Entity truck = registry -> CreateEntity();
-    // Add components
-    tank.AddComponent<TransformComponent>(glm::vec2(10.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
-    tank.AddComponent<RigidBodyComponent>(glm::vec2(50.0, 0.0));
-    tank.AddComponent<SpriteComponent>("tank-right");
+    // Create entities and add components
+    Entity chopper = registry -> CreateEntity();
+    chopper.AddComponent<TransformComponent>(glm::vec2(10.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
+    chopper.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
+    chopper.AddComponent<SpriteComponent>("chopper-image", 2, 32, 32);
+    chopper.AddComponent<AnimationComponent>(2, 15, true);
     
-    truck.AddComponent<TransformComponent>(glm::vec2(50.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
-    truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 50.0));
-    truck.AddComponent<SpriteComponent>("truck-right");
+    Entity radar = registry -> CreateEntity();
+    radar.AddComponent<TransformComponent>(glm::vec2(windowWidth - 74, 10.0), glm::vec2(1.0, 1.0), 0.0);
+    radar.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
+    radar.AddComponent<SpriteComponent>("radar-image", 2, 64, 64);
+    radar.AddComponent<AnimationComponent>(8, 5, true);
+    
+    Entity tank = registry -> CreateEntity();
+    tank.AddComponent<TransformComponent>(glm::vec2(500.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
+    tank.AddComponent<RigidBodyComponent>(glm::vec2(-30.0, 0.0));
+    tank.AddComponent<SpriteComponent>("tank-right", 2);
+    tank.AddComponent<BoxColliderComponent>(32, 32);
+
+    Entity truck = registry -> CreateEntity();
+    truck.AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
+    truck.AddComponent<RigidBodyComponent>(glm::vec2(20.0, 0.0));
+    truck.AddComponent<SpriteComponent>("truck-right", 2);
+    truck.AddComponent<BoxColliderComponent>(32, 32);
 
 
 }
@@ -160,6 +164,7 @@ void Game::Update(){
     
     // Invoke all systems that need to update
     registry -> GetSystem<MovementSystem>().Update(deltaTime);
+    registry -> GetSystem<AnimationSystem>().Update();
     
     // Update the registry to process entities that are waiting to be created/deleted
     registry -> Update(); 

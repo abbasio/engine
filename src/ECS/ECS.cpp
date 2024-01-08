@@ -1,6 +1,8 @@
 #include "ECS.h"
 #include <vector>
+#include <algorithm>
 #include "../Logger/Logger.h"
+#include "../Components/SpriteComponent.h"
 
 using namespace std;
 
@@ -15,6 +17,11 @@ int IComponent::nextId = 0;
 //--------SYSTEM
 void System::AddEntityToSystem(Entity entity){
     entities.push_back(entity);
+
+    sort(entities.begin(), entities.end(), [](Entity a, Entity b){
+                if (!a.HasComponent<SpriteComponent>() || !b.HasComponent<SpriteComponent>()) return false;
+                return (a.GetComponent<SpriteComponent>().zIndex < b.GetComponent<SpriteComponent>().zIndex);
+            });
 }
 
 void System::RemoveEntityFromSystem(Entity entity){
