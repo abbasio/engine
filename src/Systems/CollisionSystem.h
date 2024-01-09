@@ -34,10 +34,10 @@ class CollisionSystem: public System{
                 
                 // Create a bounding box for the current entity
                 SDL_Rect boxA {
-                    (int)transform.position.x,
-                    (int)transform.position.y,
-                    collider.width,
-                    collider.height
+                    (int)transform.position.x + ((int)collider.offset.x * (int)transform.scale.x),
+                    (int)transform.position.y + ((int)collider.offset.y * (int)transform.scale.y),
+                    collider.width * (int)transform.scale.x,
+                    collider.height * (int)transform.scale.y
                 };
                 
                 BoundingBox boundingBox;
