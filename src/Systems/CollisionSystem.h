@@ -2,11 +2,17 @@
 
 #include <SDL2/SDL.h>
 
+#include <vector>
 #include <unordered_map>
 #include "../ECS/ECS.h"
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/TransformComponent.h"
 #include "../Logger/Logger.h"
+
+struct BoundingBox {
+    int entityId;
+    SDL_Rect box;
+};
 
 class CollisionSystem: public System{
     public:
@@ -16,11 +22,13 @@ class CollisionSystem: public System{
         }
 
         void Update(){
-            // Create a map to cache bounding boxes: key = entityId (int), value = bounding box (SDL_Rect)  
-            unordered_map<int, SDL_Rect> entityBoxes; 
-            
+            // Create a vector to cache bounding boxes
+            vector<Entity> entities = GetSystemEntities();
+            vector<BoundingBox> boxes(entities.size());
+
             // Loop over system entities
-            for (auto entity: GetSystemEntities()){
+            for (auto entity: entities){
+                int entityId = entity.GetId();
                 const auto collider = entity.GetComponent<BoxColliderComponent>();
                 const auto transform = entity.GetComponent<TransformComponent>();
                 
@@ -32,15 +40,20 @@ class CollisionSystem: public System{
                     collider.height
                 };
                 
-                // Loop over the map - check for collisions and log 
-                for(const std::pair<const int, SDL_Rect>& boxB : entityBoxes){
-                    if(SDL_HasIntersection(&boxA, &boxB.second)){
-                        Logger::Log("Collision between entity " + to_string(entity.GetId()) + " and entity " + to_string(boxB.first));
-                    } 
-                }
+                BoundingBox boundingBox;
+                boundingBox.entityId = entityId;
+                boundingBox.box = boxA;
                 
-                // Push the key/value pair of current entity and current bounding box into the map
-                entityBoxes.insert({entity.GetId(), boxA}); 
+                // Loop over the vector of boxes - check for collisions and log
+                for (int i = 0; i < (int)boxes.size(); i++){
+                    SDL_Rect boxB = boxes[i].box;
+                    if (SDL_HasIntersection(&boxA, &boxB)){
+                        Logger::Log("Collision between entity " + to_string(entityId) + " and entity " + to_string(boxes[i].entityId));
+                    }
+                }
+               
+                // Push the bounding box into the cache vector
+                boxes.push_back(boundingBox);
             }
         }
 };
