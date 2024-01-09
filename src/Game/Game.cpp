@@ -13,6 +13,7 @@
 #include "../Components/RigidBodyComponent.h"
 #include "../Components/SpriteComponent.h"
 #include "../Systems/AnimationSystem.h"
+#include "../Systems/CollisionSystem.h"
 #include "../Systems/MovementSystem.h"
 #include "../Systems/RenderSystem.h"
 #include "../ECS/ECS.h"
@@ -43,7 +44,7 @@ void Game::Initialize(){
     
     SDL_CreateWindowAndRenderer(windowWidth, windowHeight, SDL_WINDOW_BORDERLESS, &window, &renderer);
     if (!window || !renderer){
-        Logger::Err("Error creating SDL Window and Renderer!");
+        Logger::Err("Error creating SDL Window or Renderer!");
     }
 
     assetStore -> SetRenderer(renderer);
@@ -73,6 +74,7 @@ void Game::LoadLevel(int level){
     registry -> AddSystem<MovementSystem>();
     registry -> AddSystem<RenderSystem>();
     registry -> AddSystem<AnimationSystem>();
+    registry -> AddSystem<CollisionSystem>();
 
     // Add assets to the asset store
     assetStore -> AddTexture("chopper-image", "./assets/images/chopper.png"); 
@@ -165,7 +167,7 @@ void Game::Update(){
     // Invoke all systems that need to update
     registry -> GetSystem<MovementSystem>().Update(deltaTime);
     registry -> GetSystem<AnimationSystem>().Update();
-    
+    registry -> GetSystem<CollisionSystem>().Update(); 
     // Update the registry to process entities that are waiting to be created/deleted
     registry -> Update(); 
 }
