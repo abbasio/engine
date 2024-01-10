@@ -3,6 +3,7 @@
 #include <vector>
 #include <bitset>
 #include <set>
+#include <deque>
 #include <unordered_map>
 #include <typeindex>
 #include <memory>
@@ -23,6 +24,8 @@ class Entity{
 
     public:
         Entity(int id): id(id){};
+        Entity(const Entity& entity) = default;
+        void Kill();
         int GetId() const;
         // Custom operator to check if two entities are equal to one another
         bool operator ==(const Entity& entity) const { return GetId() == entity.GetId(); }
@@ -149,6 +152,9 @@ class Registry{
         set<Entity> entitiesToBeAdded;
         set<Entity> entitiesToBeKilled;
 
+        // List of available entity IDs from previously removed entities
+        deque<int> freeIds;
+
     public:
         Registry() = default;
 
@@ -156,6 +162,7 @@ class Registry{
         
         // Entity management        
         Entity CreateEntity(); 
+        void KillEntity(Entity entity);
         
         // Component management
         template <typename TComponent, typename ...TArgs> void AddComponent(Entity entity, TArgs&& ...args);
@@ -169,9 +176,9 @@ class Registry{
         template <typename TSystem> bool HasSystem() const;  
         template <typename TSystem> TSystem& GetSystem() const;  
         
-        // Checks component signature of an entity
-        // adds entity to the systems that are interested in it
+        // Add and remove entities from systems based on component signatures
         void AddEntityToSystems(Entity entity);
+        void RemoveEntityFromSystems(Entity entity);
 
 };
 

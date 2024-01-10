@@ -153,8 +153,6 @@ void Game::LoadLevel(int level){
     truck.AddComponent<RigidBodyComponent>(glm::vec2(20.0, 0.0));
     truck.AddComponent<SpriteComponent>("truck-right", 2);
     truck.AddComponent<BoxColliderComponent>(32, 32);
-
-
 }
 
 void Game::Setup(){
