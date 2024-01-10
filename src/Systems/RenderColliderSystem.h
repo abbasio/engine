@@ -25,8 +25,8 @@ class RenderColliderSystem: public System{
                     collider.width * (int)transform.scale.x,
                     collider.height * (int)transform.scale.y
                 };
-
-                SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+                if (collider.isColliding) SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+                else SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
                 SDL_RenderDrawRect(renderer, &colliderRect);
             }
         }

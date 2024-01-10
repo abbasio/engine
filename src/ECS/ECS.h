@@ -27,7 +27,7 @@ class Entity{
         Entity(const Entity& entity) = default;
         void Kill();
         int GetId() const;
-        // Custom operator to check if two entities are equal to one another
+        // Custom operators
         bool operator ==(const Entity& entity) const { return GetId() == entity.GetId(); }
         bool operator <(const Entity& entity) const { return GetId() < entity.GetId(); }
 
