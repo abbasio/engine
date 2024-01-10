@@ -12,6 +12,7 @@
 #include "../Components/TransformComponent.h"
 #include "../Components/RigidBodyComponent.h"
 #include "../Components/SpriteComponent.h"
+#include "../Systems/RenderColliderSystem.h"
 #include "../Systems/AnimationSystem.h"
 #include "../Systems/CollisionSystem.h"
 #include "../Systems/MovementSystem.h"
@@ -23,6 +24,7 @@
 Game::Game(){
     Logger::Log("Game constructor called!"); 
     isRunning = false;
+    isDebug = false;
     registry = std::make_unique<Registry>(); 
     assetStore = std::make_unique<AssetStore>(renderer); 
 }
@@ -64,6 +66,9 @@ void Game::ProcessInput(){
                 if (sdlEvent.key.keysym.sym == SDLK_ESCAPE){
                     isRunning = false;
                 }
+                if (sdlEvent.key.keysym.sym == SDLK_d){
+                    isDebug = !isDebug;
+                }
                 break;  
         }
     }
@@ -75,6 +80,7 @@ void Game::LoadLevel(int level){
     registry -> AddSystem<RenderSystem>();
     registry -> AddSystem<AnimationSystem>();
     registry -> AddSystem<CollisionSystem>();
+    registry -> AddSystem<RenderColliderSystem>();
 
     // Add assets to the asset store
     assetStore -> AddTexture("chopper-image", "./assets/images/chopper.png"); 
@@ -124,10 +130,11 @@ void Game::LoadLevel(int level){
     
     // Create entities and add components
     Entity chopper = registry -> CreateEntity();
-    chopper.AddComponent<TransformComponent>(glm::vec2(10.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
+    chopper.AddComponent<TransformComponent>(glm::vec2(200.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
     chopper.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     chopper.AddComponent<SpriteComponent>("chopper-image", 2, 32, 32);
     chopper.AddComponent<AnimationComponent>(2, 15, true);
+    chopper.AddComponent<BoxColliderComponent>(32, 32);
     
     Entity radar = registry -> CreateEntity();
     radar.AddComponent<TransformComponent>(glm::vec2(windowWidth - 74, 10.0), glm::vec2(1.0, 1.0), 0.0);
@@ -178,6 +185,7 @@ void Game::Render(){
         
     // Invoke all systems that need to render
     registry -> GetSystem<RenderSystem>().Update(renderer, assetStore);
+    if (isDebug) registry -> GetSystem<RenderColliderSystem>().Update(renderer);
   
     SDL_RenderPresent(renderer);
 }
