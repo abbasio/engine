@@ -9,7 +9,7 @@
 #include "../Components/TransformComponent.h"
 #include "../Logger/Logger.h"
 
-struct BoundingBox {
+struct EntityBox {
     shared_ptr<Entity> entity;
     SDL_Rect box;
 };
@@ -24,7 +24,7 @@ class CollisionSystem: public System{
         void Update(){
             // Create a vector to cache bounding boxes
             vector<Entity> entities = GetSystemEntities();
-            vector<BoundingBox> boxes(entities.size());
+            vector<EntityBox> entityBoxes(entities.size());
 
             // Loop over system entities
             for (auto aEntity: entities){
@@ -41,14 +41,14 @@ class CollisionSystem: public System{
                     aCollider.height * (int)aTransform.scale.y
                 };
                 
-                BoundingBox aBoundingBox;
-                aBoundingBox.entity = make_shared<Entity>(aEntity);
-                aBoundingBox.box = aBox;
+                EntityBox aEntityBox;
+                aEntityBox.entity = make_shared<Entity>(aEntity);
+                aEntityBox.box = aBox;
                 
                 // Loop over the vector of boxes - check for collisions and log
-                for (int i = 0; i < (int)boxes.size(); i++){
-                    shared_ptr<Entity> bEntity = boxes[i].entity;
-                    SDL_Rect bBox = boxes[i].box;
+                for (auto bEntityBox: entityBoxes){
+                    shared_ptr<Entity> bEntity = bEntityBox.entity;
+                    SDL_Rect bBox = bEntityBox.box;
                     if (SDL_HasIntersection(&aBox, &bBox)){
                         auto& bCollider = bEntity -> GetComponent<BoxColliderComponent>();
                         aCollider.isColliding = true;
@@ -58,7 +58,7 @@ class CollisionSystem: public System{
                 }
                
                 // Push the bounding box into the cache vector
-                boxes.push_back(aBoundingBox);
+                entityBoxes.push_back(aEntityBox);
             }
         }
 };
