@@ -28,7 +28,6 @@ class CollisionSystem: public System{
 
             // Loop over system entities
             for (auto aEntity: entities){
-                int aEntityId = aEntity.GetId();
                 auto& aCollider = aEntity.GetComponent<BoxColliderComponent>();
                 const auto aTransform = aEntity.GetComponent<TransformComponent>();
                
@@ -54,7 +53,7 @@ class CollisionSystem: public System{
                         auto& bCollider = bEntity -> GetComponent<BoxColliderComponent>();
                         aCollider.isColliding = true;
                         bCollider.isColliding = true;
-                        Logger::Log("Collision between entity " + to_string(aEntityId) + " and entity " + to_string(bEntity -> GetId()));
+                        Logger::Log("Collision between entity " + to_string(aEntity.GetId()) + " and entity " + to_string(bEntity -> GetId()));
                     }
                 }
                
