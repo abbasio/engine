@@ -8,6 +8,8 @@
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/TransformComponent.h"
 #include "../Logger/Logger.h"
+#include "../Events/CollisionEvent.h"
+#include "../EventBus/EventBus.h"
 
 struct EntityBox {
     shared_ptr<Entity> entity;
@@ -21,7 +23,7 @@ class CollisionSystem: public System{
             RequireComponent<BoxColliderComponent>();
         }
 
-        void Update(){
+        void Update(unique_ptr<EventBus>& eventBus){
             // Create a vector to cache bounding boxes
             vector<Entity> entities = GetSystemEntities();
             vector<EntityBox> entityBoxes(entities.size());
@@ -29,7 +31,7 @@ class CollisionSystem: public System{
             // Loop over system entities
             for (auto aEntity: entities){
                 auto& aCollider = aEntity.GetComponent<BoxColliderComponent>();
-                const auto aTransform = aEntity.GetComponent<TransformComponent>();
+                auto aTransform = aEntity.GetComponent<TransformComponent>();
                
                 aCollider.isColliding = false;
 
@@ -47,16 +49,15 @@ class CollisionSystem: public System{
                 
                 // Loop over the vector of boxes - check for collisions and log
                 for (auto bEntityBox: entityBoxes){
-                    shared_ptr<Entity> bEntity = bEntityBox.entity;
                     SDL_Rect bBox = bEntityBox.box;
                     if (SDL_HasIntersection(&aBox, &bBox)){
-                        auto& bCollider = bEntity -> GetComponent<BoxColliderComponent>();
+                        Entity bEntity = *bEntityBox.entity;
+                        auto& bCollider = bEntity.GetComponent<BoxColliderComponent>();
                         aCollider.isColliding = true;
                         bCollider.isColliding = true;
                         
                         // Emit an event
-                        
-                        Logger::Log("Collision between entity " + to_string(aEntity.GetId()) + " and entity " + to_string(bEntity -> GetId()));
+                        eventBus -> EmitEvent<CollisionEvent>(aEntity, bEntity);
                     }
                 }
                

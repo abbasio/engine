@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../ECS/ECS.h"
+#include "../EventBus/EventBus.h"
 #include "../AssetStore/AssetStore.h"
 #include <SDL2/SDL.h>
 
@@ -17,7 +18,7 @@ class Game {
         
         std::unique_ptr<Registry> registry;
         std::unique_ptr<AssetStore> assetStore;
-        std::unique_ptr<EvenetBus> eventBus;
+        std::unique_ptr<EventBus> eventBus;
             
     public:
         Game();

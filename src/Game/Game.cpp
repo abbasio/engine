@@ -16,6 +16,7 @@
 #include "../Systems/AnimationSystem.h"
 #include "../Systems/CollisionSystem.h"
 #include "../Systems/MovementSystem.h"
+#include "../Systems/DamageSystem.h"
 #include "../Systems/RenderSystem.h"
 #include "../ECS/ECS.h"
 #include "../Logger/Logger.h"
@@ -26,7 +27,8 @@ Game::Game(){
     isRunning = false;
     isDebug = false;
     registry = std::make_unique<Registry>(); 
-    assetStore = std::make_unique<AssetStore>(renderer); 
+    assetStore = std::make_unique<AssetStore>(renderer);
+    eventBus = std::make_unique<EventBus>(); 
 }
 
 Game::~Game(){
@@ -80,6 +82,7 @@ void Game::LoadLevel(int level){
     registry -> AddSystem<RenderSystem>();
     registry -> AddSystem<AnimationSystem>();
     registry -> AddSystem<CollisionSystem>();
+    registry -> AddSystem<DamageSystem>();
     registry -> AddSystem<RenderColliderSystem>();
 
     // Add assets to the asset store
@@ -169,10 +172,16 @@ void Game::Update(){
     
     millisecsPreviousFrame = SDL_GetTicks();
     
+    // Reset all event handlers for current frame
+    eventBus -> Reset();
+
+    // Perform subscription events for all systems
+    registry -> GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
+     
     // Invoke all systems that need to update
     registry -> GetSystem<MovementSystem>().Update(deltaTime);
     registry -> GetSystem<AnimationSystem>().Update();
-    registry -> GetSystem<CollisionSystem>().Update(); 
+    registry -> GetSystem<CollisionSystem>().Update(eventBus); 
     // Update the registry to process entities that are waiting to be created/deleted
     registry -> Update(); 
 }

@@ -5,6 +5,7 @@
 #include <map>
 #include <list>
 #include <memory>
+#include <functional>
 #include <typeindex>
 
 using namespace std;
@@ -66,20 +67,26 @@ class EventBus {
             Logger::Log("EventBus destructor called!");
         }
 
+        // Clear subscriber list
+        void Reset() {
+            subscribers.clear();
+        } 
+
         
         // Subscribe to an event type <T>
         // Example: eventBus -> SubscribeToEvent<CollisionEvent>(this, &Game::onCollision);
         // This will put the onCollision function into the list of handlers for the event type CollisionEvent
         template <typename TEvent, typename TOwner>
         void SubscribeToEvent(TOwner* ownerInstance, void (TOwner::*callbackFunction)(TEvent&)){
-            auto handlers = subscribers[typeid(TEvent)];
-            if(!handlers.get()) handlers = make_unique<HandlerList>();
+            if (!subscribers[typeid(TEvent)].get()) {
+                subscribers[typeid(TEvent)] = make_unique<HandlerList>();
+            }
             
             // Create the wrapper around the function pointer to be called on event trigger
             auto subscriber = make_unique<EventCallback<TOwner, TEvent>>(ownerInstance, callbackFunction);
             // Add the callback function to the handler list
             // Requires changing ownership since it's a unique pointer
-            handlers -> push_back(move(subscriber));     
+            subscribers[typeid(TEvent)] -> push_back(move(subscriber));     
         }
         
         // Emit an event of type <T>
@@ -89,13 +96,15 @@ class EventBus {
         // Handler functions will be executed with arguments (player, enemy)
         template <typename TEvent, typename ...TArgs>
         void EmitEvent(TArgs&& ...args){
-            // Define the event: The parameters that the handler functions will be called with
-            const TEvent event(forward<TArgs>(args)...);
-            // Loop over all handlers and execute them with the event parameters
             auto handlers = subscribers[typeid(TEvent)].get();
-            for (auto it = handlers -> begin(); it != handlers -> end(); it++){
-                auto handler = it -> get();
-                handler -> Execute(event);
+            // Define the event: The parameters that the handler functions will be called with
+            TEvent event(forward<TArgs>(args)...);
+            if (handlers) {
+                // Loop over all handlers and execute them with the event parameters
+                for (auto it = handlers -> begin(); it != handlers -> end(); it++){
+                    auto handler = it -> get();
+                    handler -> Execute(event);
+                }
             }
         }
 };
