@@ -22,12 +22,13 @@ class IEventCallback{
 };
 
 // Wrapper around a function pointer
+// We need the owner so we can execute the function in the correct context
 template <typename TOwner, typename TEvent>
 class EventCallback: public IEventCallback {
     private:
         typedef void (TOwner::*CallbackFunction)(TEvent&);
         
-        // Get function pointer + context owner
+        // Get context owner + pointer to function
         TOwner* ownerInstance;
         CallbackFunction callbackFunction;
 
@@ -65,6 +66,10 @@ class EventBus {
             Logger::Log("EventBus destructor called!");
         }
 
+        
+        // Subscribe to an event type <T>
+        // Example: eventBus -> SubscribeToEvent<CollisionEvent>(this, &Game::onCollision);
+        // This will put the onCollision function into the list of handlers for the event type CollisionEvent
         template <typename TEvent, typename TOwner>
         void SubscribeToEvent(TOwner* ownerInstance, void (TOwner::*callbackFunction)(TEvent&)){
             auto handlers = subscribers[typeid(TEvent)];
@@ -77,14 +82,19 @@ class EventBus {
             handlers -> push_back(move(subscriber));     
         }
         
+        // Emit an event of type <T>
+        // As soon as an event is emitted, we execute all listener callback functions
+        // Example: eventBus -> EmitEvent<CollisionEvent>(player, enemy);
+        // This will execute all functions in the list of handlers for event type CollisionEvent
+        // Handler functions will be executed with arguments (player, enemy)
         template <typename TEvent, typename ...TArgs>
         void EmitEvent(TArgs&& ...args){
+            // Define the event: The parameters that the handler functions will be called with
+            const TEvent event(forward<TArgs>(args)...);
+            // Loop over all handlers and execute them with the event parameters
             auto handlers = subscribers[typeid(TEvent)].get();
-            // Loop over all function callbacks for the emitted event and execute them
-            // Pass the parameters (TArgs) into each callback
             for (auto it = handlers -> begin(); it != handlers -> end(); it++){
                 auto handler = it -> get();
-                TEvent event(forward<TArgs>(args)...);
                 handler -> Execute(event);
             }
         }
