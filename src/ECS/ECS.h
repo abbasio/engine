@@ -1,19 +1,19 @@
 #pragma once
 
-#include <vector>
-#include <bitset>
 #include <set>
 #include <deque>
-#include <unordered_map>
-#include <typeindex>
+#include <vector>
+#include <bitset>
 #include <memory>
+#include <typeindex>
+#include <unordered_map>
 #include "../Logger/Logger.h"
 
 using namespace std;
 
 //--------SIGNATURE
 // We use a bitset (1s and 0s) to keep track of which components an entity has
-// and also helps keep track of which entities a system is interested in.
+// Also helps keep track of which entities a system is interested in.
 const unsigned int MAX_COMPONENTS = 32;
 typedef bitset<MAX_COMPONENTS> Signature;
 
@@ -27,6 +27,7 @@ class Entity{
         Entity(const Entity& entity) = default;
         void Kill();
         int GetId() const;
+        
         // Custom operators
         bool operator ==(const Entity& entity) const { return GetId() == entity.GetId(); }
         bool operator <(const Entity& entity) const { return GetId() < entity.GetId(); }
@@ -36,7 +37,7 @@ class Entity{
         template <typename TComponent> bool  HasComponent() const;
         template <typename TComponent> TComponent& GetComponent() const;
 
-        //Hold a pointer to the entity's owner registr
+        //Hold a pointer to the entity's owner registry
         class Registry* registry;
 };
 

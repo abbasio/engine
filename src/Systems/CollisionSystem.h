@@ -53,6 +53,9 @@ class CollisionSystem: public System{
                         auto& bCollider = bEntity -> GetComponent<BoxColliderComponent>();
                         aCollider.isColliding = true;
                         bCollider.isColliding = true;
+                        
+                        // Emit an event
+                        
                         Logger::Log("Collision between entity " + to_string(aEntity.GetId()) + " and entity " + to_string(bEntity -> GetId()));
                     }
                 }

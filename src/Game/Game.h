@@ -17,7 +17,8 @@ class Game {
         
         std::unique_ptr<Registry> registry;
         std::unique_ptr<AssetStore> assetStore;
-
+        std::unique_ptr<EvenetBus> eventBus;
+            
     public:
         Game();
         ~Game();

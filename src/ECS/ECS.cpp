@@ -1,6 +1,6 @@
-#include "ECS.h"
 #include <vector>
 #include <algorithm>
+#include "ECS.h"
 #include "../Logger/Logger.h"
 #include "../Components/SpriteComponent.h"
 
