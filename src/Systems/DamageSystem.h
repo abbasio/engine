@@ -21,6 +21,5 @@ class DamageSystem: public System {
         }
 
         void Update() {
-            //TODO
         }
 };

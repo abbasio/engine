@@ -13,11 +13,13 @@
 #include "../Components/RigidBodyComponent.h"
 #include "../Components/SpriteComponent.h"
 #include "../Systems/RenderColliderSystem.h"
+#include "../Systems/KeyboardMovementSystem.h"
 #include "../Systems/AnimationSystem.h"
 #include "../Systems/CollisionSystem.h"
 #include "../Systems/MovementSystem.h"
 #include "../Systems/DamageSystem.h"
 #include "../Systems/RenderSystem.h"
+#include "../Events/KeyPressedEvent.h"
 #include "../ECS/ECS.h"
 #include "../Logger/Logger.h"
 #include "Game.h"
@@ -71,6 +73,7 @@ void Game::ProcessInput(){
                 if (sdlEvent.key.keysym.sym == SDLK_d){
                     isDebug = !isDebug;
                 }
+                eventBus -> EmitEvent<KeyPressedEvent>(SDL_GetKeyName(sdlEvent.key.keysym.sym)); 
                 break;  
         }
     }
@@ -84,6 +87,7 @@ void Game::LoadLevel(int level){
     registry -> AddSystem<CollisionSystem>();
     registry -> AddSystem<DamageSystem>();
     registry -> AddSystem<RenderColliderSystem>();
+    registry -> AddSystem<KeyboardMovementSystem>();
 
     // Add assets to the asset store
     assetStore -> AddTexture("chopper-image", "./assets/images/chopper.png"); 
@@ -177,7 +181,8 @@ void Game::Update(){
 
     // Perform subscription events for all systems
     registry -> GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
-     
+    registry -> GetSystem<KeyboardMovementSystem>().SubscribeToEvents(eventBus); 
+
     // Invoke all systems that need to update
     registry -> GetSystem<MovementSystem>().Update(deltaTime);
     registry -> GetSystem<AnimationSystem>().Update();
