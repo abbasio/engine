@@ -1,4 +1,5 @@
 #include <SDL2/SDL_image.h>
+#include <glm/glm.hpp> 
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <iterator>
@@ -6,7 +7,7 @@
 #include <algorithm>
 #include <sstream>
 
-#include "../../libs/glm/glm.hpp"
+#include "../Components/KeyboardControlComponent.h"
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/AnimationComponent.h"
 #include "../Components/TransformComponent.h"
@@ -19,6 +20,7 @@
 #include "../Systems/MovementSystem.h"
 #include "../Systems/DamageSystem.h"
 #include "../Systems/RenderSystem.h"
+#include "../Events/KeyReleasedEvent.h"
 #include "../Events/KeyPressedEvent.h"
 #include "../ECS/ECS.h"
 #include "../Logger/Logger.h"
@@ -74,7 +76,10 @@ void Game::ProcessInput(){
                     isDebug = !isDebug;
                 }
                 eventBus -> EmitEvent<KeyPressedEvent>(SDL_GetKeyName(sdlEvent.key.keysym.sym)); 
-                break;  
+                break; 
+            case SDL_KEYUP:
+               eventBus -> EmitEvent<KeyReleasedEvent>(SDL_GetKeyName(sdlEvent.key.keysym.sym));
+               break;
         }
     }
 }
@@ -90,7 +95,7 @@ void Game::LoadLevel(int level){
     registry -> AddSystem<KeyboardMovementSystem>();
 
     // Add assets to the asset store
-    assetStore -> AddTexture("chopper-image", "./assets/images/chopper.png"); 
+    assetStore -> AddTexture("chopper-image", "./assets/images/chopper-spritesheet.png"); 
     assetStore -> AddTexture("radar-image", "./assets/images/radar.png"); 
     assetStore -> AddTexture("tank-right", "./assets/images/tank-panther-right.png");
     assetStore -> AddTexture("truck-right", "./assets/images/truck-ford-right.png");
@@ -142,6 +147,7 @@ void Game::LoadLevel(int level){
     chopper.AddComponent<SpriteComponent>("chopper-image", 2, 32, 32);
     chopper.AddComponent<AnimationComponent>(2, 15, true);
     chopper.AddComponent<BoxColliderComponent>(32, 32);
+    chopper.AddComponent<KeyboardControlComponent>(50);
     
     Entity radar = registry -> CreateEntity();
     radar.AddComponent<TransformComponent>(glm::vec2(windowWidth - 74, 10.0), glm::vec2(1.0, 1.0), 0.0);
