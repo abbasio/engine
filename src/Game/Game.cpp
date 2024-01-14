@@ -9,12 +9,14 @@
 
 #include "../Components/KeyboardControlComponent.h"
 #include "../Components/BoxColliderComponent.h"
+#include "../Components/CameraFollowComponent.h"
 #include "../Components/AnimationComponent.h"
 #include "../Components/TransformComponent.h"
 #include "../Components/RigidBodyComponent.h"
 #include "../Components/SpriteComponent.h"
 #include "../Systems/RenderColliderSystem.h"
 #include "../Systems/KeyboardMovementSystem.h"
+#include "../Systems/CameraMovementSystem.h"
 #include "../Systems/AnimationSystem.h"
 #include "../Systems/CollisionSystem.h"
 #include "../Systems/MovementSystem.h"
@@ -25,6 +27,11 @@
 #include "../ECS/ECS.h"
 #include "../Logger/Logger.h"
 #include "Game.h"
+
+int Game::windowWidth;
+int Game::windowHeight;
+int Game::mapWidth;
+int Game::mapHeight;
 
 Game::Game(){
     Logger::Log("Game constructor called!"); 
@@ -54,6 +61,12 @@ void Game::Initialize(){
     if (!window || !renderer){
         Logger::Err("Error creating SDL Window or Renderer!");
     }
+
+    // Initialize camera view with the entire screen area
+    camera.x = 0;
+    camera.y = 0;
+    camera.w = windowWidth;
+    camera.h = windowHeight;
 
     assetStore -> SetRenderer(renderer);
     SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
@@ -93,6 +106,7 @@ void Game::LoadLevel(int level){
     registry -> AddSystem<DamageSystem>();
     registry -> AddSystem<RenderColliderSystem>();
     registry -> AddSystem<KeyboardMovementSystem>();
+    registry -> AddSystem<CameraMovementSystem>();
 
     // Add assets to the asset store
     assetStore -> AddTexture("chopper-image", "./assets/images/chopper-spritesheet.png"); 
@@ -140,6 +154,10 @@ void Game::LoadLevel(int level){
         }
     }
     
+    // Set the map width (in pixels) based on the number of rows and columns in the tile map
+    mapWidth = tileMap[0].size() * tileSize * tileScale;
+    mapHeight = tileMap.size() * tileSize * tileScale;
+
     // Create entities and add components
     Entity chopper = registry -> CreateEntity();
     chopper.AddComponent<TransformComponent>(glm::vec2(200.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
@@ -148,7 +166,8 @@ void Game::LoadLevel(int level){
     chopper.AddComponent<AnimationComponent>(2, 15, true);
     chopper.AddComponent<BoxColliderComponent>(32, 32);
     chopper.AddComponent<KeyboardControlComponent>(50);
-    
+    chopper.AddComponent<CameraFollowComponent>();
+
     Entity radar = registry -> CreateEntity();
     radar.AddComponent<TransformComponent>(glm::vec2(windowWidth - 74, 10.0), glm::vec2(1.0, 1.0), 0.0);
     radar.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
@@ -192,7 +211,8 @@ void Game::Update(){
     // Invoke all systems that need to update
     registry -> GetSystem<MovementSystem>().Update(deltaTime);
     registry -> GetSystem<AnimationSystem>().Update();
-    registry -> GetSystem<CollisionSystem>().Update(eventBus); 
+    registry -> GetSystem<CollisionSystem>().Update(eventBus);
+    registry -> GetSystem<CameraMovementSystem>().Update(camera);
     // Update the registry to process entities that are waiting to be created/deleted
     registry -> Update(); 
 }
@@ -202,7 +222,7 @@ void Game::Render(){
     SDL_RenderClear(renderer);
         
     // Invoke all systems that need to render
-    registry -> GetSystem<RenderSystem>().Update(renderer, assetStore);
+    registry -> GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
     if (isDebug) registry -> GetSystem<RenderColliderSystem>().Update(renderer);
   
     SDL_RenderPresent(renderer);

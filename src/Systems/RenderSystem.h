@@ -12,7 +12,7 @@ class RenderSystem: public System{
             RequireComponent<TransformComponent>();
         }
         
-        void Update(SDL_Renderer* renderer, std::unique_ptr<AssetStore>& assetStore){
+        void Update(SDL_Renderer* renderer, std::unique_ptr<AssetStore>& assetStore, SDL_Rect& camera){
             // Sort all entities of our system by their z index
             
             // Loop all entities that the system is interested in
@@ -35,9 +35,10 @@ class RenderSystem: public System{
                 } 
     
                 // Set destination rectangle with the x, y position to be rendered
+                // Base on the camera position
                 SDL_Rect destRect = {
-                    static_cast<int>(transform.position.x),
-                    static_cast<int>(transform.position.y),
+                    static_cast<int>(transform.position.x - camera.x),
+                    static_cast<int>(transform.position.y - camera.y),
                     static_cast<int>(spriteWidth * transform.scale.x),
                     static_cast<int>(spriteHeight * transform.scale.y)
                 };
