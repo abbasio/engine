@@ -17,7 +17,7 @@ class DamageSystem: public System {
 
         void onCollision(CollisionEvent& event) {
             Logger::Log("Collision between entity " + to_string(event.a.GetId()) + " and entity " + to_string(event.b.GetId()));
-            event.b.Kill();
+            //event.b.Kill();
         }
 
         void Update() {

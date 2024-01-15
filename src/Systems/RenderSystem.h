@@ -20,27 +20,18 @@ class RenderSystem: public System{
                 const auto transform = entity.GetComponent<TransformComponent>();
                 const auto sprite = entity.GetComponent<SpriteComponent>();
                 SDL_Texture* texture = assetStore -> GetTexture(sprite.assetId);   
-                
+               
                 // Set source rectangle of our original sprite texture
                 SDL_Rect srcRect = sprite.srcRect;
-                if (srcRect.w == 0 && srcRect.h == 0){
-                    SDL_QueryTexture(texture, NULL, NULL, &srcRect.w, &srcRect.h);
-                }
-                
-                auto spriteWidth = sprite.width;
-                auto spriteHeight = sprite.height;
-                if (spriteWidth == 0 && spriteHeight == 0){
-                    spriteWidth = srcRect.w;
-                    spriteHeight = srcRect.h;
-                } 
-    
+                // Look into SDL_QueryTexture to handle automatically
+
                 // Set destination rectangle with the x, y position to be rendered
                 // Base on the camera position
                 SDL_Rect destRect = {
                     static_cast<int>(transform.position.x - (sprite.isFixed ? 0 : camera.x)),
                     static_cast<int>(transform.position.y - (sprite.isFixed ? 0 : camera.y)),
-                    static_cast<int>(spriteWidth * transform.scale.x),
-                    static_cast<int>(spriteHeight * transform.scale.y)
+                    static_cast<int>(sprite.width * transform.scale.x),
+                    static_cast<int>(sprite.height * transform.scale.y)
                 };
 
                 SDL_RenderCopyEx(

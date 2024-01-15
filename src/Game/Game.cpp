@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 
+#include "../Components/ProjectileEmitterComponent.h"
 #include "../Components/KeyboardControlComponent.h"
 #include "../Components/CameraFollowComponent.h"
 #include "../Components/BoxColliderComponent.h"
@@ -12,6 +13,7 @@
 #include "../Components/RigidBodyComponent.h"
 #include "../Components/SpriteComponent.h"
 
+#include "../Systems/ProjectileEmitSystem.h"
 #include "../Systems/KeyboardMovementSystem.h"
 #include "../Systems/RenderColliderSystem.h"
 #include "../Systems/CameraMovementSystem.h"
@@ -103,6 +105,7 @@ void Game::ProcessInput(){
 void Game::LoadLevel(int level){
     // Add the systems that need to be processed in our game
     registry -> AddSystem<KeyboardMovementSystem>();
+    registry -> AddSystem<ProjectileEmitSystem>();
     registry -> AddSystem<RenderColliderSystem>();
     registry -> AddSystem<CameraMovementSystem>();
     registry -> AddSystem<AnimationSystem>();
@@ -115,6 +118,7 @@ void Game::LoadLevel(int level){
     assetStore -> AddTexture("chopper-image", "./assets/images/chopper-spritesheet.png"); 
     assetStore -> AddTexture("tank-right", "./assets/images/tank-panther-right.png");
     assetStore -> AddTexture("truck-right", "./assets/images/truck-ford-right.png");
+    assetStore -> AddTexture("bullet-image", "./assets/images/bullet.png");
     assetStore -> AddTexture("radar-image", "./assets/images/radar.png"); 
     assetStore -> AddTexture("tileset", "./assets/tilemaps/jungle.png");
     
@@ -153,7 +157,7 @@ void Game::LoadLevel(int level){
             int tileSetColumn = (tileMap[i][j] - (tileSetRow * tileSetWidth));
             int srcRectX = tileSize * tileSetColumn;
             int srcRectY = tileSize * tileSetRow;
-            tile.AddComponent<SpriteComponent>("tileset", 1, tileSize, tileSize, false,  srcRectX, srcRectY);           
+            tile.AddComponent<SpriteComponent>("tileset", tileSize, tileSize, 1, false, srcRectX, srcRectY);           
         }
     }
     
@@ -164,7 +168,7 @@ void Game::LoadLevel(int level){
     // Create entities and add components
     Entity chopper = registry -> CreateEntity();
     chopper.AddComponent<TransformComponent>(glm::vec2(200.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
-    chopper.AddComponent<SpriteComponent>("chopper-image", 2, 32, 32);
+    chopper.AddComponent<SpriteComponent>("chopper-image", 32, 32, 2);
     chopper.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     chopper.AddComponent<AnimationComponent>(2, 15, true);
     chopper.AddComponent<KeyboardControlComponent>(90);
@@ -179,14 +183,15 @@ void Game::LoadLevel(int level){
     
     Entity tank = registry -> CreateEntity();
     tank.AddComponent<TransformComponent>(glm::vec2(500.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
-    tank.AddComponent<RigidBodyComponent>(glm::vec2(-90.0, 0.0));
-    tank.AddComponent<SpriteComponent>("tank-right", 2);
+    tank.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
+    tank.AddComponent<SpriteComponent>("tank-right", 32, 32, 2);
     tank.AddComponent<BoxColliderComponent>(32, 32);
+    tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0, 100.0), 2000, 10000, 0, false);
 
     Entity truck = registry -> CreateEntity();
     truck.AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
-    truck.AddComponent<RigidBodyComponent>(glm::vec2(50.0, 0.0));
-    truck.AddComponent<SpriteComponent>("truck-right", 2);
+    truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
+    truck.AddComponent<SpriteComponent>("truck-right", 32, 32, 2);
     truck.AddComponent<BoxColliderComponent>(32, 32);
 }
 
@@ -213,6 +218,7 @@ void Game::Update(){
 
     // Invoke all systems that need to update
     registry -> GetSystem<CameraMovementSystem>().Update(camera);
+    registry -> GetSystem<ProjectileEmitSystem>().Update(registry);
     registry -> GetSystem<CollisionSystem>().Update(eventBus);
     registry -> GetSystem<MovementSystem>().Update(deltaTime);
     registry -> GetSystem<AnimationSystem>().Update();
