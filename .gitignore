@@ -1,5 +1,7 @@
 engine
 
+.cache/*
+
 libs/glm/*
 !libs/glm/.gitkeep
 
@@ -14,3 +16,5 @@ libs/sol/*
 
 assets/*
 !assets/.gitkeep
+
+compile_commands.json 

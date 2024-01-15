@@ -2,11 +2,12 @@
 
 #include "../Logger/Logger.h"
 #include "Event.h"
-#include <map>
-#include <list>
-#include <memory>
+
 #include <functional>
 #include <typeindex>
+#include <memory>
+#include <list>
+#include <map>
 
 using namespace std;
 

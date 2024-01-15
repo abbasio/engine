@@ -1,7 +1,7 @@
 #pragma once
 
 #include <SDL2/SDL.h>
-#include "../ECS/ECS.h"
+
 #include "../EventBus/Event.h"
 
 class KeyReleasedEvent: public Event {

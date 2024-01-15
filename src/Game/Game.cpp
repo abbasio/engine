@@ -1,31 +1,30 @@
 #include <SDL2/SDL_image.h>
-#include <glm/glm.hpp> 
 #include <SDL2/SDL.h>
-#include <iostream>
-#include <iterator>
+#include <glm/glm.hpp>
 #include <fstream>
-#include <algorithm>
 #include <sstream>
 
 #include "../Components/KeyboardControlComponent.h"
-#include "../Components/BoxColliderComponent.h"
 #include "../Components/CameraFollowComponent.h"
+#include "../Components/BoxColliderComponent.h"
 #include "../Components/AnimationComponent.h"
 #include "../Components/TransformComponent.h"
 #include "../Components/RigidBodyComponent.h"
 #include "../Components/SpriteComponent.h"
-#include "../Systems/RenderColliderSystem.h"
+
 #include "../Systems/KeyboardMovementSystem.h"
+#include "../Systems/RenderColliderSystem.h"
 #include "../Systems/CameraMovementSystem.h"
 #include "../Systems/AnimationSystem.h"
 #include "../Systems/CollisionSystem.h"
 #include "../Systems/MovementSystem.h"
 #include "../Systems/DamageSystem.h"
 #include "../Systems/RenderSystem.h"
+
 #include "../Events/KeyReleasedEvent.h"
 #include "../Events/KeyPressedEvent.h"
-#include "../ECS/ECS.h"
 #include "../Logger/Logger.h"
+#include "../ECS/ECS.h"
 #include "Game.h"
 
 int Game::windowWidth;
@@ -34,19 +33,22 @@ int Game::mapWidth;
 int Game::mapHeight;
 
 Game::Game(){
-    Logger::Log("Game constructor called!"); 
     isRunning = false;
     isDebug = false;
-    registry = std::make_unique<Registry>(); 
+    
+    // Instantiate unique pointers
     assetStore = std::make_unique<AssetStore>(renderer);
+    registry = std::make_unique<Registry>(); 
     eventBus = std::make_unique<EventBus>(); 
+    
+    Logger::Log("Game constructor called!");
 }
 
 Game::~Game(){
     Logger::Log("Game destructor called!"); 
 }
 
-void Game::Initialize(){
+void Game::Initialize() {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         Logger::Err("Error initializing SDL."); 
         return;
@@ -54,6 +56,7 @@ void Game::Initialize(){
 
     SDL_DisplayMode displayMode;
     SDL_GetCurrentDisplayMode(0, &displayMode);
+    
     windowWidth = displayMode.w; 
     windowHeight = displayMode.h;
     
@@ -62,15 +65,15 @@ void Game::Initialize(){
         Logger::Err("Error creating SDL Window or Renderer!");
     }
 
+    SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+    assetStore -> SetRenderer(renderer);
+    isRunning = true;
+    
     // Initialize camera view with the entire screen area
     camera.x = 0;
     camera.y = 0;
     camera.w = windowWidth;
     camera.h = windowHeight;
-
-    assetStore -> SetRenderer(renderer);
-    SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
-    isRunning = true;
 }
 
 
@@ -99,25 +102,25 @@ void Game::ProcessInput(){
 
 void Game::LoadLevel(int level){
     // Add the systems that need to be processed in our game
-    registry -> AddSystem<MovementSystem>();
-    registry -> AddSystem<RenderSystem>();
+    registry -> AddSystem<KeyboardMovementSystem>();
+    registry -> AddSystem<RenderColliderSystem>();
+    registry -> AddSystem<CameraMovementSystem>();
     registry -> AddSystem<AnimationSystem>();
     registry -> AddSystem<CollisionSystem>();
+    registry -> AddSystem<MovementSystem>();
+    registry -> AddSystem<RenderSystem>();
     registry -> AddSystem<DamageSystem>();
-    registry -> AddSystem<RenderColliderSystem>();
-    registry -> AddSystem<KeyboardMovementSystem>();
-    registry -> AddSystem<CameraMovementSystem>();
 
     // Add assets to the asset store
     assetStore -> AddTexture("chopper-image", "./assets/images/chopper-spritesheet.png"); 
-    assetStore -> AddTexture("radar-image", "./assets/images/radar.png"); 
     assetStore -> AddTexture("tank-right", "./assets/images/tank-panther-right.png");
     assetStore -> AddTexture("truck-right", "./assets/images/truck-ford-right.png");
+    assetStore -> AddTexture("radar-image", "./assets/images/radar.png"); 
     assetStore -> AddTexture("tileset", "./assets/tilemaps/jungle.png");
     
     // Create a 2D tilemap vector
-    vector<vector<int>> tileMap;
     ifstream infile("./assets/tilemaps/jungle.map");
+    vector<vector<int>> tileMap;
     string tileMapString;
     
     // Get each line of the map file
@@ -150,7 +153,7 @@ void Game::LoadLevel(int level){
             int tileSetColumn = (tileMap[i][j] - (tileSetRow * tileSetWidth));
             int srcRectX = tileSize * tileSetColumn;
             int srcRectY = tileSize * tileSetRow;
-            tile.AddComponent<SpriteComponent>("tileset", 1, tileSize, tileSize, srcRectX, srcRectY);           
+            tile.AddComponent<SpriteComponent>("tileset", 1, tileSize, tileSize, false,  srcRectX, srcRectY);           
         }
     }
     
@@ -161,17 +164,17 @@ void Game::LoadLevel(int level){
     // Create entities and add components
     Entity chopper = registry -> CreateEntity();
     chopper.AddComponent<TransformComponent>(glm::vec2(200.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
-    chopper.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     chopper.AddComponent<SpriteComponent>("chopper-image", 2, 32, 32);
+    chopper.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     chopper.AddComponent<AnimationComponent>(2, 15, true);
+    chopper.AddComponent<KeyboardControlComponent>(90);
     chopper.AddComponent<BoxColliderComponent>(32, 32);
-    chopper.AddComponent<KeyboardControlComponent>(50);
     chopper.AddComponent<CameraFollowComponent>();
 
     Entity radar = registry -> CreateEntity();
     radar.AddComponent<TransformComponent>(glm::vec2(windowWidth - 74, 10.0), glm::vec2(1.0, 1.0), 0.0);
+    radar.AddComponent<SpriteComponent>("radar-image", 2, 64, 64, true);
     radar.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
-    radar.AddComponent<SpriteComponent>("radar-image", 2, 64, 64);
     radar.AddComponent<AnimationComponent>(8, 5, true);
     
     Entity tank = registry -> CreateEntity();
@@ -209,10 +212,10 @@ void Game::Update(){
     registry -> GetSystem<KeyboardMovementSystem>().SubscribeToEvents(eventBus); 
 
     // Invoke all systems that need to update
+    registry -> GetSystem<CameraMovementSystem>().Update(camera);
+    registry -> GetSystem<CollisionSystem>().Update(eventBus);
     registry -> GetSystem<MovementSystem>().Update(deltaTime);
     registry -> GetSystem<AnimationSystem>().Update();
-    registry -> GetSystem<CollisionSystem>().Update(eventBus);
-    registry -> GetSystem<CameraMovementSystem>().Update(camera);
     // Update the registry to process entities that are waiting to be created/deleted
     registry -> Update(); 
 }
@@ -223,7 +226,7 @@ void Game::Render(){
         
     // Invoke all systems that need to render
     registry -> GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
-    if (isDebug) registry -> GetSystem<RenderColliderSystem>().Update(renderer);
+    if (isDebug) registry -> GetSystem<RenderColliderSystem>().Update(renderer, camera);
   
     SDL_RenderPresent(renderer);
 }

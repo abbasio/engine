@@ -1,9 +1,10 @@
 #pragma once
 
+#include <SDL2/SDL.h>
+
 #include "../ECS/ECS.h"
 #include "../EventBus/EventBus.h"
 #include "../AssetStore/AssetStore.h"
-#include <SDL2/SDL.h>
 
 const int FPS = 60;
 const int MS_PER_FRAME = 1000 / FPS;
