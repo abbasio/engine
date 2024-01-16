@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../ECS/ECS.h"
-#include "../Logger/Logger.h"
 #include "../EventBus/EventBus.h"
 #include "../Events/KeyPressedEvent.h"
 #include "../Events/KeyReleasedEvent.h"

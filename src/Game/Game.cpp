@@ -14,8 +14,8 @@
 #include "../Components/HealthComponent.h"
 #include "../Components/SpriteComponent.h"
 
-#include "../Systems/ProjectileEmitSystem.h"
 #include "../Systems/KeyboardMovementSystem.h"
+#include "../Systems/ProjectileEmitSystem.h"
 #include "../Systems/RenderColliderSystem.h"
 #include "../Systems/CameraMovementSystem.h"
 #include "../Systems/AnimationSystem.h"
@@ -171,6 +171,7 @@ void Game::LoadLevel(int level){
     // Create entities and add components
     Entity chopper = registry -> CreateEntity();
     chopper.AddComponent<TransformComponent>(glm::vec2(200.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
+    chopper.AddComponent<ProjectileEmitterComponent>(glm::vec2(100.0, 0), 2000, 10000, 33, false);
     chopper.AddComponent<SpriteComponent>("chopper-image", 32, 32, 2);
     chopper.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     chopper.AddComponent<AnimationComponent>(2, 15, true);
@@ -187,16 +188,16 @@ void Game::LoadLevel(int level){
     
     Entity tank = registry -> CreateEntity();
     tank.AddComponent<TransformComponent>(glm::vec2(500.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
-    tank.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
+    tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0, 100.0), 2000, 10000, 33);
     tank.AddComponent<SpriteComponent>("tank-right", 32, 32, 2);
+    tank.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     tank.AddComponent<BoxColliderComponent>(32, 32);
-    tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0, 100.0), 2000, 10000, 0, false);
     tank.AddComponent<HealthComponent>(100);
 
     Entity truck = registry -> CreateEntity();
     truck.AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
-    truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     truck.AddComponent<SpriteComponent>("truck-right", 32, 32, 2);
+    truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     truck.AddComponent<BoxColliderComponent>(32, 32);
     truck.AddComponent<HealthComponent>(100);
 }
@@ -219,9 +220,10 @@ void Game::Update(){
     eventBus -> Reset();
 
     // Perform subscription events for all systems
-    registry -> GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
     registry -> GetSystem<KeyboardMovementSystem>().SubscribeToEvents(eventBus); 
-
+    registry ->GetSystem<ProjectileEmitSystem>().SubscribeToEvents(eventBus);
+    registry -> GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
+    
     // Invoke all systems that need to update
     registry -> GetSystem<CameraMovementSystem>().Update(camera);
     registry -> GetSystem<ProjectileEmitSystem>().Update(registry);
@@ -229,6 +231,7 @@ void Game::Update(){
     registry -> GetSystem<MovementSystem>().Update(deltaTime);
     registry -> GetSystem<LifecycleSystem>().Update();
     registry -> GetSystem<AnimationSystem>().Update();
+    
     // Update the registry to process entities that are waiting to be created/deleted
     registry -> Update(); 
 }
