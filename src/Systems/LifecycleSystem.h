@@ -14,7 +14,7 @@ class LifecycleSystem: public System {
         void Update() {
             for (auto entity: GetSystemEntities()){
                 auto lifecycle = entity.GetComponent<LifecycleComponent>();
-                if((SDL_GetTicks() - lifecycle.startTime) >= lifecycle.timeToLive) {
+                if((int)(SDL_GetTicks() - lifecycle.startTime) >= lifecycle.timeToLive) {
                    entity.Kill(); 
                 }     
             }

@@ -171,7 +171,7 @@ void Game::LoadLevel(int level){
     // Create entities and add components
     Entity chopper = registry -> CreateEntity();
     chopper.AddComponent<TransformComponent>(glm::vec2(200.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
-    chopper.AddComponent<ProjectileEmitterComponent>(glm::vec2(100.0, 0), 2000, 10000, 33, false);
+    chopper.AddComponent<ProjectileEmitterComponent>(glm::vec2(300.0, 300.0), 200, 10000, 33, false);
     chopper.AddComponent<SpriteComponent>("chopper-image", 32, 32, 2);
     chopper.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     chopper.AddComponent<AnimationComponent>(2, 15, true);

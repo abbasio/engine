@@ -10,14 +10,16 @@ struct SpriteComponent{
     int zIndex;
     bool isFixed;
     SDL_Rect srcRect;
+    std::string direction; 
 
-    SpriteComponent(std::string assetId = "", int width = 0, int height = 0, int zIndex = 0, bool isFixed = false, int srcRectX = 0, int srcRectY = 0){
+    SpriteComponent(std::string assetId = "", int width = 0, int height = 0, int zIndex = 0, bool isFixed = false, int srcRectX = 0, int srcRectY = 0, std::string direction = "Right"){
         this -> assetId = assetId;
         this -> width = width;
         this -> height = height;
         this -> zIndex = zIndex;
         this -> isFixed = isFixed;
         this -> srcRect = {srcRectX, srcRectY, width, height};
+        this -> direction = direction;
     }
 };
 

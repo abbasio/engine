@@ -31,21 +31,25 @@ class KeyboardMovementSystem: public System {
                 if (event.key == "Up") {
                     rigidBody.velocity.y = -keyboardControl.speed;
                     sprite.srcRect.y = sprite.height * 0;
+                    sprite.direction = event.key;
                 }
                 
                 if (event.key == "Right") {
                     rigidBody.velocity.x = keyboardControl.speed;
                     sprite.srcRect.y = sprite.height * 1;
+                    sprite.direction = event.key;
                 }
                 
                 if (event.key == "Down") {
                     rigidBody.velocity.y = keyboardControl.speed;
                     sprite.srcRect.y = sprite.height * 2;
+                    sprite.direction = event.key;
                 }
                 
                 if (event.key == "Left") {
                     rigidBody.velocity.x = -keyboardControl.speed;
                     sprite.srcRect.y = sprite.height * 3;
+                    sprite.direction = event.key;
                 }
             }
         }
