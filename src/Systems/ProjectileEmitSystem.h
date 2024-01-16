@@ -7,6 +7,7 @@
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/RigidBodyComponent.h"
 #include "../Components/TransformComponent.h"
+#include "../Components/LifecycleComponent.h"
 #include "../Components/SpriteComponent.h"
 
 class ProjectileEmitSystem: public System {
@@ -20,9 +21,9 @@ class ProjectileEmitSystem: public System {
             for (auto entity: GetSystemEntities()){
                 auto& projectileEmitter = entity.GetComponent<ProjectileEmitterComponent>();
                 const auto transform = entity.GetComponent<TransformComponent>();
-                
-                //TODO: Check if it's time to emit a new projectile
-                if (SDL_GetTicks() - projectileEmitter.lastFiredTime > projectileEmitter.projectileFrequency){
+                uint32_t now = SDL_GetTicks();
+                // Check if it's time to emit a new projectile
+                if (now - projectileEmitter.lastFiredTime > projectileEmitter.projectileFrequency){
                     glm::vec2 projectilePosition = transform.position;
                     if(entity.HasComponent<SpriteComponent>()){
                         const auto sprite = entity.GetComponent<SpriteComponent>();
@@ -35,9 +36,10 @@ class ProjectileEmitSystem: public System {
                     projectile.AddComponent<TransformComponent>(projectilePosition, glm::vec2(1.0, 1.0), 0.0);
                     projectile.AddComponent<RigidBodyComponent>(projectileEmitter.projectileVelocity);
                     projectile.AddComponent<SpriteComponent>("bullet-image", 4, 4, 4);
-                    projectile.AddComponent<BoxColliderComponent>(4, 4);
+                    projectile.AddComponent<BoxColliderComponent>(4, 4, 2);
+                    projectile.AddComponent<LifecycleComponent>(5000);
 
-                    projectileEmitter.lastFiredTime = SDL_GetTicks();
+                    projectileEmitter.lastFiredTime = now;
                 }
             }
         }

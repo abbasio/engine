@@ -11,6 +11,7 @@
 #include "../Components/AnimationComponent.h"
 #include "../Components/TransformComponent.h"
 #include "../Components/RigidBodyComponent.h"
+#include "../Components/HealthComponent.h"
 #include "../Components/SpriteComponent.h"
 
 #include "../Systems/ProjectileEmitSystem.h"
@@ -18,6 +19,7 @@
 #include "../Systems/RenderColliderSystem.h"
 #include "../Systems/CameraMovementSystem.h"
 #include "../Systems/AnimationSystem.h"
+#include "../Systems/LifecycleSystem.h"
 #include "../Systems/CollisionSystem.h"
 #include "../Systems/MovementSystem.h"
 #include "../Systems/DamageSystem.h"
@@ -110,6 +112,7 @@ void Game::LoadLevel(int level){
     registry -> AddSystem<CameraMovementSystem>();
     registry -> AddSystem<AnimationSystem>();
     registry -> AddSystem<CollisionSystem>();
+    registry -> AddSystem<LifecycleSystem>();
     registry -> AddSystem<MovementSystem>();
     registry -> AddSystem<RenderSystem>();
     registry -> AddSystem<DamageSystem>();
@@ -174,6 +177,7 @@ void Game::LoadLevel(int level){
     chopper.AddComponent<KeyboardControlComponent>(90);
     chopper.AddComponent<BoxColliderComponent>(32, 32);
     chopper.AddComponent<CameraFollowComponent>();
+    chopper.AddComponent<HealthComponent>(100);
 
     Entity radar = registry -> CreateEntity();
     radar.AddComponent<TransformComponent>(glm::vec2(windowWidth - 74, 10.0), glm::vec2(1.0, 1.0), 0.0);
@@ -187,12 +191,14 @@ void Game::LoadLevel(int level){
     tank.AddComponent<SpriteComponent>("tank-right", 32, 32, 2);
     tank.AddComponent<BoxColliderComponent>(32, 32);
     tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0, 100.0), 2000, 10000, 0, false);
+    tank.AddComponent<HealthComponent>(100);
 
     Entity truck = registry -> CreateEntity();
     truck.AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
     truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     truck.AddComponent<SpriteComponent>("truck-right", 32, 32, 2);
     truck.AddComponent<BoxColliderComponent>(32, 32);
+    truck.AddComponent<HealthComponent>(100);
 }
 
 void Game::Setup(){
@@ -221,6 +227,7 @@ void Game::Update(){
     registry -> GetSystem<ProjectileEmitSystem>().Update(registry);
     registry -> GetSystem<CollisionSystem>().Update(eventBus);
     registry -> GetSystem<MovementSystem>().Update(deltaTime);
+    registry -> GetSystem<LifecycleSystem>().Update();
     registry -> GetSystem<AnimationSystem>().Update();
     // Update the registry to process entities that are waiting to be created/deleted
     registry -> Update(); 
