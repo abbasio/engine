@@ -16,6 +16,6 @@ struct ProjectileEmitterComponent {
         this -> projectileDuration = projectileDuration;
         this -> projectileDamage = projectileDamage;
         this -> isAuto = isAuto;
-        this -> lastFiredTime = SDL_GetTicks();
+        this -> lastFiredTime = SDL_GetTicks(); 
     }
 };

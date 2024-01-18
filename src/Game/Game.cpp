@@ -150,17 +150,19 @@ void Game::LoadLevel(int level){
     // Loop over the 2D tileMap vector and create a tile entity for each entry
     for(int i = 0; i < static_cast<int>(tileMap.size()); i++){
         for(int j = 0; j < static_cast<int>(tileMap[i].size()); j++){
-            Entity tile = registry -> CreateEntity();
             // Define the tile locations based on the indices 
             int tileXPos = j * tileSize * tileScale;
             int tileYPos = i * tileSize * tileScale;
-            tile.AddComponent<TransformComponent>(glm::vec2(tileXPos, tileYPos), glm::vec2(tileScale, tileScale));
             // Define sprite srcRect based on value
             int tileSetRow = floor(tileMap[i][j] / tileSetWidth);
             int tileSetColumn = (tileMap[i][j] - (tileSetRow * tileSetWidth));
             int srcRectX = tileSize * tileSetColumn;
             int srcRectY = tileSize * tileSetRow;
-            tile.AddComponent<SpriteComponent>("tileset", tileSize, tileSize, 1, false, srcRectX, srcRectY);           
+
+            Entity tile = registry -> CreateEntity();
+            tile.Group("tiles");
+            tile.AddComponent<TransformComponent>(glm::vec2(tileXPos, tileYPos), glm::vec2(tileScale, tileScale));
+            tile.AddComponent<SpriteComponent>("tileset", tileSize, tileSize, 1, false, srcRectX, srcRectY); 
         }
     }
     
@@ -170,6 +172,7 @@ void Game::LoadLevel(int level){
 
     // Create entities and add components
     Entity chopper = registry -> CreateEntity();
+    chopper.Tag("player");
     chopper.AddComponent<TransformComponent>(glm::vec2(200.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
     chopper.AddComponent<ProjectileEmitterComponent>(glm::vec2(300.0, 300.0), 200, 10000, 33, false);
     chopper.AddComponent<SpriteComponent>("chopper-image", 32, 32, 2);
@@ -187,6 +190,7 @@ void Game::LoadLevel(int level){
     radar.AddComponent<AnimationComponent>(8, 5, true);
     
     Entity tank = registry -> CreateEntity();
+    tank.Group("enemies");
     tank.AddComponent<TransformComponent>(glm::vec2(500.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
     tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0, 100.0), 2000, 10000, 33);
     tank.AddComponent<SpriteComponent>("tank-right", 32, 32, 2);
@@ -195,6 +199,7 @@ void Game::LoadLevel(int level){
     tank.AddComponent<HealthComponent>(100);
 
     Entity truck = registry -> CreateEntity();
+    truck.Group("enemies");
     truck.AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
     truck.AddComponent<SpriteComponent>("truck-right", 32, 32, 2);
     truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));

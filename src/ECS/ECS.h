@@ -27,6 +27,12 @@ class Entity{
         Entity(const Entity& entity) = default;
         void Kill();
         int GetId() const;
+
+        // Manage tags and groups
+        void Tag(const string& tag);
+        bool HasTag(const string& tag) const;
+        void Group(const string& group);
+        bool BelongsToGroup(const string& group) const;
         
         // Custom operators
         bool operator ==(const Entity& entity) const { return GetId() == entity.GetId(); }
@@ -152,6 +158,18 @@ class Registry{
         // Set of entities that are flagged to be added or removed in the next registry update()
         set<Entity> entitiesToBeAdded;
         set<Entity> entitiesToBeKilled;
+        
+        // Entity tags - one tag per entity
+        // Map tag -> entity
+        unordered_map<string, Entity> entityPerTag;
+        // Map entityId -> tag
+        unordered_map<int, string> tagPerEntity;
+
+        // Entity groups - a set of entities per group name
+        // Map group -> entities
+        unordered_map<string, set<Entity>> entitiesPerGroup;
+        // Map entityId -> group
+        unordered_map<int, string> groupPerEntity;
 
         // List of available entity IDs from previously removed entities
         deque<int> freeIds;
@@ -175,7 +193,19 @@ class Registry{
         template <typename TSystem, typename ...TArgs> void AddSystem(TArgs&& ...args);
         template <typename TSystem> void RemoveSystem();
         template <typename TSystem> bool HasSystem() const;  
-        template <typename TSystem> TSystem& GetSystem() const;  
+        template <typename TSystem> TSystem& GetSystem() const; 
+
+        // Tag management
+        void TagEntity(Entity entity, const string& tag);
+        bool EntityHasTag(Entity entity, const string& tag) const;
+        Entity GetEntityByTag(const string& tag) const;
+        void RemoveEntityTag(Entity entity);
+
+        // Group management
+        void GroupEntity(Entity entity, const string& group);
+        bool EntityBelongsToGroup(Entity entity, const string& group) const;
+        vector<Entity> GetEntitiesByGroup(const string& group) const;
+        void RemoveEntityGroup(Entity entity);       
         
         // Add and remove entities from systems based on component signatures
         void AddEntityToSystems(Entity entity);
