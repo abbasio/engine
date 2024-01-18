@@ -173,13 +173,13 @@ void Game::LoadLevel(int level){
     // Create entities and add components
     Entity chopper = registry -> CreateEntity();
     chopper.Tag("player");
-    chopper.AddComponent<TransformComponent>(glm::vec2(200.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
+    chopper.AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
     chopper.AddComponent<ProjectileEmitterComponent>(glm::vec2(300.0, 300.0), 200, 10000, 33, false);
     chopper.AddComponent<SpriteComponent>("chopper-image", 32, 32, 2);
     chopper.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     chopper.AddComponent<AnimationComponent>(2, 15, true);
     chopper.AddComponent<KeyboardControlComponent>(90);
-    chopper.AddComponent<BoxColliderComponent>(32, 32);
+    chopper.AddComponent<BoxColliderComponent>(32, 32, 1);
     chopper.AddComponent<CameraFollowComponent>();
     chopper.AddComponent<HealthComponent>(100);
 
@@ -195,7 +195,7 @@ void Game::LoadLevel(int level){
     tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0, 100.0), 2000, 10000, 33);
     tank.AddComponent<SpriteComponent>("tank-right", 32, 32, 2);
     tank.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
-    tank.AddComponent<BoxColliderComponent>(32, 32);
+    tank.AddComponent<BoxColliderComponent>(32, 32, 2);
     tank.AddComponent<HealthComponent>(100);
 
     Entity truck = registry -> CreateEntity();
@@ -203,7 +203,7 @@ void Game::LoadLevel(int level){
     truck.AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
     truck.AddComponent<SpriteComponent>("truck-right", 32, 32, 2);
     truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
-    truck.AddComponent<BoxColliderComponent>(32, 32);
+    truck.AddComponent<BoxColliderComponent>(32, 32, 2);
     truck.AddComponent<HealthComponent>(100);
 }
 

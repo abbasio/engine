@@ -1,8 +1,11 @@
 #pragma once
 
+#include "../Components/DamageComponent.h"
+#include "../Components/HealthComponent.h"
+#include "../Components/BoxColliderComponent.h"
+
 #include "../ECS/ECS.h"
 #include "../Logger/Logger.h"
-#include "../Components/BoxColliderComponent.h"
 #include "../EventBus/EventBus.h"
 #include "../Events/CollisionEvent.h"
 class DamageSystem: public System {
@@ -16,8 +19,30 @@ class DamageSystem: public System {
         }
 
         void onCollision(CollisionEvent& event) {
-            Logger::Log("Collision between entity " + to_string(event.a.GetId()) + " and entity " + to_string(event.b.GetId()));
-            //event.b.Kill();
+            Entity a = event.a;
+            Entity b = event.b;
+            Logger::Log("Collision between entity " + to_string(a.GetId()) + " and entity " + to_string(b.GetId()));
+
+            if(a.BelongsToGroup("projectiles") && (b.HasTag("player") || b.BelongsToGroup("enemies"))) {
+                onProjectileHit(a, b);
+            }
+            
+            if(b.BelongsToGroup("projectiles") && (a.HasTag("player") || a.BelongsToGroup("enemies"))) {
+                onProjectileHit(b, a);
+            }
+        }
+
+        void onProjectileHit(Entity projectile, Entity unit) {
+            auto projectileCollider = projectile.GetComponent<BoxColliderComponent>();
+            auto projectileDamage = projectile.GetComponent<DamageComponent>();
+            auto unitCollider = unit.GetComponent<BoxColliderComponent>();
+            auto& unitHealth = unit.GetComponent<HealthComponent>();
+
+            if (projectileCollider.damageLayer != unitCollider.damageLayer) {
+                unitHealth.healthPercentage -= projectileDamage.damage; 
+                if (unitHealth.healthPercentage <= 0) unit.Kill();
+                projectile.Kill(); 
+            }
         }
 
         void Update() {

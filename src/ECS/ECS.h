@@ -194,6 +194,11 @@ class Registry{
         template <typename TSystem> void RemoveSystem();
         template <typename TSystem> bool HasSystem() const;  
         template <typename TSystem> TSystem& GetSystem() const; 
+        
+        // A note on tags and groups:
+        // Strings are not optimal to use for tagging and grouping entities
+        // Keeping them for now, but would be better to use a data structure to map strings to unique numerical IDs
+        // Values sorted inside said structure allows for binary search
 
         // Tag management
         void TagEntity(Entity entity, const string& tag);
