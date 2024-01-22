@@ -8,7 +8,7 @@
 #include <typeindex>
 #include <unordered_map>
 #include "../Logger/Logger.h"
-
+#include <iostream>
 using namespace std;
 
 //--------SIGNATURE
@@ -87,30 +87,38 @@ class System{
 
 //--------POOL
 // A pool is just a vector of objects of type T
+// Size: Actual number of elements in vector
+// Returned by size() and affected by resize(new_size)
+// Capacity: Number of elements that CAN be stored in vector (memory allocated)
+// Returned by capacity() and affected by reserve(new_capacity)
 class IPool{
     public:
-        virtual ~IPool(){}
+        virtual ~IPool() = default;
+        virtual void RemoveEntityFromPool(int entityId) = 0;
 };
 template <typename T>
 class Pool: public IPool{
     private:
         vector<T> data;
+
+        unordered_map<int, int> entityIdToIndex;
+        unordered_map<int, int> indexToEntityId;
     public:
-        Pool(int size = 100){
-            data.resize(size);
+        Pool(int capacity = 100){
+            data.reserve(capacity);
         }
         virtual ~Pool() = default;
         
-        bool isEmpty() const{
+        bool IsEmpty() const{
             return data.empty();
         }
 
-        int getSize() const{
+        int GetSize() const{
             return data.size();
         }
 
-        void Resize(int n){
-            data.resize(n);
+        void Reserve(int n){
+            data.reserve(n);
         }
 
         void Clear(){
@@ -121,11 +129,46 @@ class Pool: public IPool{
             data.push_back(object);
         }
 
-        void Set(int index, T object){
-            data[index] = object;
+        void Set(int entityId, T object){
+            if (entityIdToIndex.find(entityId) != entityIdToIndex.end()) {
+                // If the element already exists, just replace the component object
+                int index = entityIdToIndex[entityId];
+                data[index] = object;
+            } else {
+                // Using push_back() will add the value to the end of the vector
+                // and automatically increase vector capacity if needed
+                data.push_back(object);
+                // When adding a new object, keep track of entity ID and vector index
+                // The index at the end of the vector will be its size - 1 (for non-empty vectors)
+                int index = data.size() - 1;
+                entityIdToIndex.emplace(entityId, index);
+                indexToEntityId.emplace(index, entityId);
+            }
         }
 
-        T& Get(int index){
+        void Remove(int entityId) {
+            // Copy the last element to the deleted position to keep the array packed
+            // Then remove the last element
+            int indexOfRemoved = entityIdToIndex[entityId];
+            int indexOfLast = data.size() - 1;
+            data[indexOfRemoved] = data[indexOfLast];
+            data.pop_back();
+
+            // Update the index-entity maps to point to the correct elements
+            int entityIdOfLastElement = indexToEntityId[indexOfLast];
+            entityIdToIndex[entityIdOfLastElement] = indexOfRemoved;
+            indexToEntityId[indexOfRemoved] = entityIdOfLastElement;
+
+            entityIdToIndex.erase(entityId);
+            indexToEntityId.erase(indexOfLast);
+        }
+
+        void RemoveEntityFromPool(int entityId) override {
+            if (entityIdToIndex.find(entityId) != entityIdToIndex.end()) Remove(entityId);
+        }
+
+        T& Get(int entityId){
+            int index = entityIdToIndex[entityId];
             return static_cast<T&>(data[index]);
         }
 
@@ -268,11 +311,6 @@ void Registry::AddComponent(Entity entity, TArgs&& ...args){
     // Get the pool of component values for the given component type
     shared_ptr<Pool<TComponent>> componentPool = static_pointer_cast<Pool<TComponent>>(componentPools[componentId]);
 
-    // Resize componentPool vector if needed
-    if(entityId >= componentPool -> getSize()){
-        componentPool -> Resize(numEntities);
-    }
-
     // Create a new component object of the type T, and forward the various parameters to the constructor
     TComponent newComponent(forward<TArgs>(args)...);
 
@@ -283,6 +321,7 @@ void Registry::AddComponent(Entity entity, TArgs&& ...args){
     entityComponentSignatures[entityId].set(componentId);
 
     Logger::Log("Component ID = " + to_string(componentId) + " was added to entity ID " + to_string(entityId));
+    cout << "COMPONENT ID = " << componentId << " --> POOL SIZE: " << componentPool -> GetSize() << std::endl;
 }
 
 template<typename TComponent>
@@ -290,8 +329,14 @@ void Registry::RemoveComponent(Entity entity){
     const auto componentId = Component<TComponent>::GetId();
     const auto entityId = entity.GetId();
 
+
+    // Remove component from component list for that entity
+    shared_ptr<Pool<TComponent>> componentPool = static_pointer_cast<Pool<TComponent>>(componentPools[componentId]);
+    componentPool -> Remove(entityId);
+
+    // Set the component signature for that entity to false
     entityComponentSignatures[entityId].set(componentId, false);
-    
+
     Logger::Log("Component ID = " + to_string(componentId) + " was removed from entity ID " + to_string(entityId));
 }
 

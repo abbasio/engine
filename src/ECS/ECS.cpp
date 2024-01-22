@@ -187,6 +187,11 @@ void Registry::Update(){
 
     // Process entities that are waiting to be killed
     for (auto entity: entitiesToBeKilled){
+        // Remove entity from component pools
+        for (auto pool: componentPools) {
+            pool -> RemoveEntityFromPool(entity.GetId());
+        }
+
         RemoveEntityFromSystems(entity);
         entityComponentSignatures[entity.GetId()].reset();
 
