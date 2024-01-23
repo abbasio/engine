@@ -21,8 +21,7 @@ class DamageSystem: public System {
         void onCollision(CollisionEvent& event) {
             Entity a = event.a;
             Entity b = event.b;
-            Logger::Log("Collision between entity " + to_string(a.GetId()) + " and entity " + to_string(b.GetId()));
-
+            
             if(a.BelongsToGroup("projectiles") && (b.HasTag("player") || b.BelongsToGroup("enemies"))) {
                 onProjectileHit(a, b);
             }

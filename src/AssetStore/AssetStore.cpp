@@ -32,8 +32,6 @@ void AssetStore::AddTexture(const string& assetId, const string& filePath){
 
     // Add texture to map
     textures.emplace(assetId, texture);
-
-    Logger::Log("New texture added to the asset store with ID = " + assetId);
 }
 
 SDL_Texture* AssetStore::GetTexture(const string& assetId) {

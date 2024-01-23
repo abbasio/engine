@@ -3,13 +3,11 @@
 #include <SDL2/SDL.h>
 
 #include <vector>
-#include <unordered_map>
 #include "../ECS/ECS.h"
+#include "../EventBus/EventBus.h"
+#include "../Events/CollisionEvent.h"
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/TransformComponent.h"
-#include "../Logger/Logger.h"
-#include "../Events/CollisionEvent.h"
-#include "../EventBus/EventBus.h"
 
 struct EntityBox {
     shared_ptr<Entity> entity;

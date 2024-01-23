@@ -7,8 +7,7 @@
 #include <memory>
 #include <typeindex>
 #include <unordered_map>
-#include "../Logger/Logger.h"
-#include <iostream>
+
 using namespace std;
 
 //--------SIGNATURE
@@ -319,9 +318,6 @@ void Registry::AddComponent(Entity entity, TArgs&& ...args){
 
     // Finally, change the component signature of the entity and set the component id on the bitset to 1
     entityComponentSignatures[entityId].set(componentId);
-
-    Logger::Log("Component ID = " + to_string(componentId) + " was added to entity ID " + to_string(entityId));
-    cout << "COMPONENT ID = " << componentId << " --> POOL SIZE: " << componentPool -> GetSize() << std::endl;
 }
 
 template<typename TComponent>
@@ -336,8 +332,6 @@ void Registry::RemoveComponent(Entity entity){
 
     // Set the component signature for that entity to false
     entityComponentSignatures[entityId].set(componentId, false);
-
-    Logger::Log("Component ID = " + to_string(componentId) + " was removed from entity ID " + to_string(entityId));
 }
 
 template<typename TComponent>

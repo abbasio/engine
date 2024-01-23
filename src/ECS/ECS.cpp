@@ -1,7 +1,6 @@
 #include <vector>
 #include <algorithm>
 #include "ECS.h"
-#include "../Logger/Logger.h"
 #include "../Components/SpriteComponent.h"
 
 using namespace std;
@@ -79,8 +78,6 @@ Entity Registry::CreateEntity(){
     // Set the entry's parent registry to the current registry
     entity.registry = this;
     entitiesToBeAdded.insert(entity);
-    
-    Logger::Log("Entity created with id = " + to_string(entityId));
     
     return entity;
 }

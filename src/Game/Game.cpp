@@ -68,7 +68,7 @@ void Game::Initialize() {
     if (!window || !renderer){
         Logger::Err("Error creating SDL Window or Renderer!");
     }
-
+    
     SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
     assetStore -> SetRenderer(renderer);
     isRunning = true;
