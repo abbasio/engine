@@ -124,7 +124,9 @@ void Game::LoadLevel(int level){
     assetStore -> AddTexture("bullet-image", "./assets/images/bullet.png");
     assetStore -> AddTexture("radar-image", "./assets/images/radar.png"); 
     assetStore -> AddTexture("tileset", "./assets/tilemaps/jungle.png");
-    
+   
+    assetStore -> AddFont("kitchensink_font", "./assets/fonts/kitchen sink.ttf", 14);
+
     // Create a 2D tilemap vector
     ifstream infile("./assets/tilemaps/jungle.map");
     vector<vector<int>> tileMap;
@@ -205,6 +207,9 @@ void Game::LoadLevel(int level){
     truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     truck.AddComponent<BoxColliderComponent>(32, 32, 2);
     truck.AddComponent<HealthComponent>(100);
+
+   // Entity label = registry -> CreateEntity();
+    //label.AddComponent<TextLabelComponent>(<position>, <text>, <font>);
 }
 
 void Game::Setup(){

@@ -4,12 +4,12 @@
 
 using namespace std;
 
-AssetStore::AssetStore(SDL_Renderer* renderer){
+AssetStore::AssetStore(SDL_Renderer* renderer) {
     this -> renderer = renderer;
     Logger::Log("Asset Store constructor called!");
 }
 
-AssetStore::~AssetStore(){
+AssetStore::~AssetStore() {
     ClearAssets();
     Logger::Log("Asset Store destructor called!");
 }
@@ -18,11 +18,16 @@ void AssetStore::SetRenderer(SDL_Renderer* renderer){
     this -> renderer = renderer;
 }
 
-void AssetStore::ClearAssets(){
-    for(auto texture: textures){
+void AssetStore::ClearAssets() {
+    for(auto texture: textures) {
         SDL_DestroyTexture(texture.second);
     }
     textures.clear();
+ 
+    for (auto font: fonts) {
+        TTF_CloseFont(font.second);
+    }
+    fonts.clear();
 }
 
 void AssetStore::AddTexture(const string& assetId, const string& filePath){
@@ -36,4 +41,12 @@ void AssetStore::AddTexture(const string& assetId, const string& filePath){
 
 SDL_Texture* AssetStore::GetTexture(const string& assetId) {
     return textures[assetId];
+}
+
+void AssetStore::AddFont(const string& assetId, const string& filePath, int fontSize) {
+    fonts.emplace(assetId, TTF_OpenFont(filePath.c_str(), fontSize));
+}
+
+TTF_Font* AssetStore::GetFont(const string& assetId) {
+   return fonts[assetId]; 
 }
