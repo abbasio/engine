@@ -7,6 +7,7 @@
 #include "../Components/ProjectileEmitterComponent.h"
 #include "../Components/KeyboardControlComponent.h"
 #include "../Components/CameraFollowComponent.h"
+#include "../Components/TextLabelComponent.h"
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/AnimationComponent.h"
 #include "../Components/TransformComponent.h"
@@ -18,6 +19,7 @@
 #include "../Systems/ProjectileEmitSystem.h"
 #include "../Systems/RenderColliderSystem.h"
 #include "../Systems/CameraMovementSystem.h"
+#include "../Systems/RenderTextSystem.h"
 #include "../Systems/AnimationSystem.h"
 #include "../Systems/LifecycleSystem.h"
 #include "../Systems/CollisionSystem.h"
@@ -55,6 +57,11 @@ Game::~Game(){
 void Game::Initialize() {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         Logger::Err("Error initializing SDL."); 
+        return;
+    }
+    
+    if (TTF_Init() != 0){
+        Logger::Err("Error initializing SDL TTF");
         return;
     }
 
@@ -110,6 +117,7 @@ void Game::LoadLevel(int level){
     registry -> AddSystem<ProjectileEmitSystem>();
     registry -> AddSystem<RenderColliderSystem>();
     registry -> AddSystem<CameraMovementSystem>();
+    registry -> AddSystem<RenderTextSystem>();
     registry -> AddSystem<AnimationSystem>();
     registry -> AddSystem<CollisionSystem>();
     registry -> AddSystem<LifecycleSystem>();
@@ -125,7 +133,7 @@ void Game::LoadLevel(int level){
     assetStore -> AddTexture("radar-image", "./assets/images/radar.png"); 
     assetStore -> AddTexture("tileset", "./assets/tilemaps/jungle.png");
    
-    assetStore -> AddFont("kitchensink_font", "./assets/fonts/kitchen sink.ttf", 14);
+    assetStore -> AddFont("kitchensink_font", "./assets/fonts/kitchensink.ttf", 14);
 
     // Create a 2D tilemap vector
     ifstream infile("./assets/tilemaps/jungle.map");
@@ -208,8 +216,9 @@ void Game::LoadLevel(int level){
     truck.AddComponent<BoxColliderComponent>(32, 32, 2);
     truck.AddComponent<HealthComponent>(100);
 
-   // Entity label = registry -> CreateEntity();
-    //label.AddComponent<TextLabelComponent>(<position>, <text>, <font>);
+    Entity label = registry -> CreateEntity();
+    SDL_Color white = {255, 255, 255};
+    label.AddComponent<TextLabelComponent>(glm::vec2(100, 100), "THIS IS A TEXT LABEL", "kitchensink_font", white);
 }
 
 void Game::Setup(){
@@ -231,7 +240,7 @@ void Game::Update(){
 
     // Perform subscription events for all systems
     registry -> GetSystem<KeyboardMovementSystem>().SubscribeToEvents(eventBus); 
-    registry ->GetSystem<ProjectileEmitSystem>().SubscribeToEvents(eventBus);
+    registry -> GetSystem<ProjectileEmitSystem>().SubscribeToEvents(eventBus);
     registry -> GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
     
     // Invoke all systems that need to update
@@ -252,6 +261,7 @@ void Game::Render(){
         
     // Invoke all systems that need to render
     registry -> GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
+    registry -> GetSystem<RenderTextSystem>().Update(renderer, assetStore, camera);
     if (isDebug) registry -> GetSystem<RenderColliderSystem>().Update(renderer, camera);
   
     SDL_RenderPresent(renderer);
