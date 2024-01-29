@@ -67,6 +67,7 @@ class RenderHealthSystem: public System {
                 };
                 
                 SDL_RenderCopy(renderer, texture, NULL, &destRect);
+                SDL_DestroyTexture(texture);
 
             }
         }
