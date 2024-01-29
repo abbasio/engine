@@ -1,10 +1,10 @@
 #pragma once
 
+#include <SDL2/SDL.h>
+
 #include "../ECS/ECS.h"
 #include "../AssetStore/AssetStore.h"
 #include "../Components/TextLabelComponent.h"
-
-#include <SDL2/SDL.h>
 
 class RenderTextSystem: public System {
     public:

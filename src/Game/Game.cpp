@@ -19,6 +19,7 @@
 #include "../Systems/ProjectileEmitSystem.h"
 #include "../Systems/RenderColliderSystem.h"
 #include "../Systems/CameraMovementSystem.h"
+#include "../Systems/RenderHealthSystem.h"
 #include "../Systems/RenderTextSystem.h"
 #include "../Systems/AnimationSystem.h"
 #include "../Systems/LifecycleSystem.h"
@@ -117,6 +118,7 @@ void Game::LoadLevel(int level){
     registry -> AddSystem<ProjectileEmitSystem>();
     registry -> AddSystem<RenderColliderSystem>();
     registry -> AddSystem<CameraMovementSystem>();
+    registry -> AddSystem<RenderHealthSystem>();
     registry -> AddSystem<RenderTextSystem>();
     registry -> AddSystem<AnimationSystem>();
     registry -> AddSystem<CollisionSystem>();
@@ -133,7 +135,7 @@ void Game::LoadLevel(int level){
     assetStore -> AddTexture("radar-image", "./assets/images/radar.png"); 
     assetStore -> AddTexture("tileset", "./assets/tilemaps/jungle.png");
    
-    assetStore -> AddFont("kitchensink_font", "./assets/fonts/kitchensink.ttf", 14);
+    assetStore -> AddFont("kitchensink_font", "./assets/fonts/kitchensink.ttf", 12);
 
     // Create a 2D tilemap vector
     ifstream infile("./assets/tilemaps/jungle.map");
@@ -183,8 +185,8 @@ void Game::LoadLevel(int level){
     // Create entities and add components
     Entity chopper = registry -> CreateEntity();
     chopper.Tag("player");
-    chopper.AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
-    chopper.AddComponent<ProjectileEmitterComponent>(glm::vec2(300.0, 300.0), 200, 10000, 33, false);
+    chopper.AddComponent<TransformComponent>(glm::vec2(300.0, 100.0), glm::vec2(1.0, 1.0), 0.0);
+    chopper.AddComponent<ProjectileEmitterComponent>(glm::vec2(300.0, 300.0), 200, 10000, 10, false);
     chopper.AddComponent<SpriteComponent>("chopper-image", 32, 32, 2);
     chopper.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     chopper.AddComponent<AnimationComponent>(2, 15, true);
@@ -217,8 +219,8 @@ void Game::LoadLevel(int level){
     truck.AddComponent<HealthComponent>(100);
 
     Entity label = registry -> CreateEntity();
-    SDL_Color white = {255, 255, 255};
-    label.AddComponent<TextLabelComponent>(glm::vec2(100, 100), "THIS IS A TEXT LABEL", "kitchensink_font", white);
+    SDL_Color green = {0, 255, 0};
+    label.AddComponent<TextLabelComponent>(glm::vec2(windowWidth / 2 - 60, 10), "Game v1.0", "kitchensink_font", green);
 }
 
 void Game::Setup(){
@@ -262,6 +264,7 @@ void Game::Render(){
     // Invoke all systems that need to render
     registry -> GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
     registry -> GetSystem<RenderTextSystem>().Update(renderer, assetStore, camera);
+    registry -> GetSystem<RenderHealthSystem>().Update(renderer, assetStore, camera);
     if (isDebug) registry -> GetSystem<RenderColliderSystem>().Update(renderer, camera);
   
     SDL_RenderPresent(renderer);
