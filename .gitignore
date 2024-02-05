@@ -7,6 +7,7 @@ libs/glm/*
 
 libs/imgui/*
 !libs/imgui/.gitkeep
+imgui.ini
 
 libs/lua/*
 !libs/lua/.gitkeep

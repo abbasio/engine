@@ -1,6 +1,9 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL.h>
 #include <glm/glm.hpp>
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_sdl2.h>
+#include <imgui/imgui_impl_sdlrenderer2.h>
 #include <fstream>
 #include <sstream>
 
@@ -81,6 +84,10 @@ void Game::Initialize() {
     assetStore -> SetRenderer(renderer);
     isRunning = true;
     
+    // Initialize ImGui
+    ImGui::CreateContext();
+    ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
+    ImGui_ImplSDLRenderer2_Init(renderer);
     // Initialize camera view with the entire screen area
     camera.x = 0;
     camera.y = 0;
@@ -92,6 +99,18 @@ void Game::Initialize() {
 void Game::ProcessInput(){
     SDL_Event sdlEvent;
     while(SDL_PollEvent(&sdlEvent)){
+        // ImGui SDL input
+        ImGui_ImplSDL2_ProcessEvent(&sdlEvent);
+        ImGuiIO& io = ImGui::GetIO();
+
+        int mouseX, mouseY;
+        const int buttons = SDL_GetMouseState(&mouseX, &mouseY);
+
+        io.MousePos = ImVec2(mouseX, mouseY);
+        io.MouseDown[0] = buttons & SDL_BUTTON(SDL_BUTTON_LEFT);
+        io.MouseDown[1] = buttons & SDL_BUTTON(SDL_BUTTON_RIGHT);
+
+        // Handle core SDL events
         switch(sdlEvent.type){
             case SDL_QUIT:
                 isRunning = false;
@@ -265,8 +284,17 @@ void Game::Render(){
     registry -> GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
     registry -> GetSystem<RenderTextSystem>().Update(renderer, assetStore, camera);
     registry -> GetSystem<RenderHealthSystem>().Update(renderer, assetStore, camera);
-    if (isDebug) registry -> GetSystem<RenderColliderSystem>().Update(renderer, camera);
-  
+    if (isDebug){
+        registry -> GetSystem<RenderColliderSystem>().Update(renderer, camera);
+        
+        // Start the ImGui frame
+        ImGui_ImplSDLRenderer2_NewFrame();
+        ImGui_ImplSDL2_NewFrame();
+        ImGui::NewFrame();
+        ImGui::ShowDemoWindow();
+        ImGui::Render();
+        ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
+    } 
     SDL_RenderPresent(renderer);
 }
 
@@ -280,6 +308,10 @@ void Game::Run(){
 }
 
 void Game::Destroy(){
+   ImGui_ImplSDLRenderer2_Shutdown();
+   ImGui_ImplSDL2_Shutdown();
+   ImGui::DestroyContext();
+
    SDL_DestroyRenderer(renderer);
    SDL_DestroyWindow(window);
    SDL_Quit(); 
