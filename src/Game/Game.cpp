@@ -24,6 +24,7 @@
 #include "../Systems/CameraMovementSystem.h"
 #include "../Systems/RenderHealthSystem.h"
 #include "../Systems/RenderTextSystem.h"
+#include "../Systems/RenderGUISystem.h"
 #include "../Systems/AnimationSystem.h"
 #include "../Systems/LifecycleSystem.h"
 #include "../Systems/CollisionSystem.h"
@@ -139,6 +140,7 @@ void Game::LoadLevel(int level){
     registry -> AddSystem<CameraMovementSystem>();
     registry -> AddSystem<RenderHealthSystem>();
     registry -> AddSystem<RenderTextSystem>();
+    registry -> AddSystem<RenderGUISystem>();
     registry -> AddSystem<AnimationSystem>();
     registry -> AddSystem<CollisionSystem>();
     registry -> AddSystem<LifecycleSystem>();
@@ -287,13 +289,8 @@ void Game::Render(){
     if (isDebug){
         registry -> GetSystem<RenderColliderSystem>().Update(renderer, camera);
         
+        registry -> GetSystem<RenderGUISystem>().Update();
         // Start the ImGui frame
-        ImGui_ImplSDLRenderer2_NewFrame();
-        ImGui_ImplSDL2_NewFrame();
-        ImGui::NewFrame();
-        ImGui::ShowDemoWindow();
-        ImGui::Render();
-        ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
     } 
     SDL_RenderPresent(renderer);
 }
