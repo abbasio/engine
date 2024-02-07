@@ -46,9 +46,9 @@ class RenderGUISystem: public System {
                 ImGui::Combo("enemy sprite", &sprite_index, sprites, IM_ARRAYSIZE(sprites));
                 ImGui::InputInt("x position (pixels)", &enemyXPos);
                 ImGui::InputInt("y position (pixels)", &enemyYPos);
-                ImGui::InputInt("x scale multiplier", &enemyXScale);
-                ImGui::InputInt("y scale multiplier", &enemyYScale);
-                ImGui::SliderAngle("enemy rotation (degrees)", &enemyRotation);
+                ImGui::SliderInt("x scale multiplier", &enemyXScale, 1, 10);
+                ImGui::SliderInt("y scale multiplier", &enemyYScale, 1, 10);
+                ImGui::SliderAngle("enemy rotation (degrees)", &enemyRotation, 0, 360);
                 ImGui::Checkbox("use projectile emitter?", &useProjectileEmitter);
                 if (useProjectileEmitter){
                     ImGui::InputInt("projectile x velocity (pixels per second)", &projectileXVelocity);
@@ -57,14 +57,14 @@ class RenderGUISystem: public System {
                     ImGui::InputInt("projectile duration (ms)", &projectileDuration);
                     ImGui::InputInt("projectile damage", &projectileDamage);
                 }
-                ImGui::InputInt("health", &enemyHealth);
+                ImGui::SliderInt("health", &enemyHealth, 0, 100);
 
                 // Button to create a new enemy
                 if (ImGui::Button("Create Enemy")) {
                     // Create an entity
                     Entity enemy = registry -> CreateEntity();
                     enemy.Group("enemies");
-                    enemy.AddComponent<TransformComponent>(glm::vec2(enemyXPos, enemyYPos), glm::vec2(enemyXScale, enemyYScale), enemyRotation * (180 / 3.14159265358979));
+                    enemy.AddComponent<TransformComponent>(glm::vec2(enemyXPos, enemyYPos), glm::vec2(enemyXScale, enemyYScale), glm::degrees(enemyRotation));
                     if (useProjectileEmitter) {
                         enemy.AddComponent<ProjectileEmitterComponent>(glm::vec2(projectileXVelocity, projectileYVelocity), projectileFrequency, projectileDuration, projectileDamage);
                     }
