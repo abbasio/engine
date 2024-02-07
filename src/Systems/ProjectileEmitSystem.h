@@ -61,7 +61,7 @@ class ProjectileEmitSystem: public System {
                         projectile.AddComponent<SpriteComponent>("bullet-image", 4, 4, 4);
                         projectile.AddComponent<BoxColliderComponent>(4, 4, 1);
                         // Set something on the projectile emitter component to control lifecycle instead of hardcoding
-                        projectile.AddComponent<LifecycleComponent>(5000);
+                        projectile.AddComponent<LifecycleComponent>(projectileEmitter.projectileDuration);
                         projectile.AddComponent<DamageComponent>(projectileEmitter.projectileDamage);
 
                         projectileEmitter.lastFiredTime = now;
@@ -92,7 +92,7 @@ class ProjectileEmitSystem: public System {
                     projectile.AddComponent<SpriteComponent>("bullet-image", 4, 4, 4);
                     projectile.AddComponent<BoxColliderComponent>(4, 4, 2);
                     // Set something on the projectile emitter component to control lifecycle instead of hardcoding
-                    projectile.AddComponent<LifecycleComponent>(5000);
+                    projectile.AddComponent<LifecycleComponent>(projectileEmitter.projectileDuration);
                     projectile.AddComponent<DamageComponent>(projectileEmitter.projectileDamage);
 
                     projectileEmitter.lastFiredTime = now;

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../Logger/Logger.h"
 #include "../ECS/ECS.h"
 #include <glm/glm.hpp>
 #include <imgui/imgui.h>
@@ -25,7 +24,9 @@ class RenderGUISystem: public System {
             ImGui::NewFrame();
             // Create an ImGui window
             if (ImGui::Begin("Spawn enemies")){
-                // Input for X and Y positions
+                static int sprite_index = 0;
+                static const char* sprites[]{"tank-right", "truck-right"};
+
                 static int enemyXPos = 0;
                 static int enemyYPos = 0;
                 static int enemyXScale = 1;
@@ -42,6 +43,7 @@ class RenderGUISystem: public System {
                 static int projectileDuration = 5000;
                 static int projectileDamage = 10;
                 
+                ImGui::Combo("enemy sprite", &sprite_index, sprites, IM_ARRAYSIZE(sprites));
                 ImGui::InputInt("x position (pixels)", &enemyXPos);
                 ImGui::InputInt("y position (pixels)", &enemyYPos);
                 ImGui::InputInt("x scale multiplier", &enemyXScale);
@@ -59,13 +61,14 @@ class RenderGUISystem: public System {
 
                 // Button to create a new enemy
                 if (ImGui::Button("Create Enemy")) {
-                    Logger::Log(to_string(enemyRotation));
                     // Create an entity
                     Entity enemy = registry -> CreateEntity();
                     enemy.Group("enemies");
                     enemy.AddComponent<TransformComponent>(glm::vec2(enemyXPos, enemyYPos), glm::vec2(enemyXScale, enemyYScale), enemyRotation * (180 / 3.14159265358979));
-                    enemy.AddComponent<ProjectileEmitterComponent>(glm::vec2(projectileXVelocity, projectileYVelocity), projectileFrequency, projectileDuration, projectileDamage);
-                    enemy.AddComponent<SpriteComponent>("tank-right", 32, 32, 2);
+                    if (useProjectileEmitter) {
+                        enemy.AddComponent<ProjectileEmitterComponent>(glm::vec2(projectileXVelocity, projectileYVelocity), projectileFrequency, projectileDuration, projectileDamage);
+                    }
+                    enemy.AddComponent<SpriteComponent>(sprites[sprite_index], 32, 32, 2);
                     enemy.AddComponent<RigidBodyComponent>(glm::vec2(enemyXVelocity, enemyYVelocity));
                     enemy.AddComponent<BoxColliderComponent>(32, 32, 2);
                     enemy.AddComponent<HealthComponent>(enemyHealth);
