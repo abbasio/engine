@@ -63,7 +63,12 @@ class MovementSystem: public System{
                     transform.position.y < 0 ||
                     transform.position.y > Game::mapHeight      
                 );
-
+                
+                if (entity.HasTag("player") && entity.HasComponent<SpriteComponent>()){
+                    auto& sprite = entity.GetComponent<SpriteComponent>();
+                    transform.position.x = std::clamp(transform.position.x, 0.0f, (float)Game::mapWidth - sprite.width);
+                    transform.position.y = std::clamp(transform.position.y, 0.0f, (float)Game::mapHeight - sprite.height);
+                }
                 if (isOutsideMap && !entity.HasTag("player")) entity.Kill();
             }
         }  
