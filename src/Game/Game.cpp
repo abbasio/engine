@@ -120,7 +120,7 @@ void Game::ProcessInput(){
                 if (sdlEvent.key.keysym.sym == SDLK_ESCAPE){
                     isRunning = false;
                 }
-                if (sdlEvent.key.keysym.sym == SDLK_d){
+                if (sdlEvent.key.keysym.sym == SDLK_F1){
                     isDebug = !isDebug;
                 }
                 eventBus -> EmitEvent<KeyPressedEvent>(SDL_GetKeyName(sdlEvent.key.keysym.sym)); 
@@ -153,6 +153,7 @@ void Game::LoadLevel(int level){
     assetStore -> AddTexture("tank-right", "./assets/images/tank-panther-right.png");
     assetStore -> AddTexture("truck-right", "./assets/images/truck-ford-right.png");
     assetStore -> AddTexture("bullet-image", "./assets/images/bullet.png");
+    assetStore -> AddTexture("tree-image", "./assets/images/tree.png");
     assetStore -> AddTexture("radar-image", "./assets/images/radar.png"); 
     assetStore -> AddTexture("tileset", "./assets/tilemaps/jungle.png");
    
@@ -224,10 +225,10 @@ void Game::LoadLevel(int level){
     
     Entity tank = registry -> CreateEntity();
     tank.Group("enemies");
-    tank.AddComponent<TransformComponent>(glm::vec2(500.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
-    tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0, 100.0), 2000, 10000, 33);
+    tank.AddComponent<TransformComponent>(glm::vec2(500.0, 500.0), glm::vec2(1.0, 1.0), 0.0);
+    //tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0, 100.0), 2000, 10000, 33);
     tank.AddComponent<SpriteComponent>("tank-right", 32, 32, 2);
-    tank.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
+    tank.AddComponent<RigidBodyComponent>(glm::vec2(20.0, 0.0));
     tank.AddComponent<BoxColliderComponent>(32, 32, 2);
     tank.AddComponent<HealthComponent>(100);
 
@@ -239,6 +240,18 @@ void Game::LoadLevel(int level){
     truck.AddComponent<BoxColliderComponent>(32, 32, 2);
     truck.AddComponent<HealthComponent>(100);
 
+    Entity treeA = registry -> CreateEntity();
+    treeA.Group("obstacles");
+    treeA.AddComponent<TransformComponent>(glm::vec2(600.0, 495.0), glm::vec2(1.0, 1.0), 0.0);
+    treeA.AddComponent<SpriteComponent>("tree-image", 16, 32, 2);
+    treeA.AddComponent<BoxColliderComponent>(16, 32, 0);
+    
+    Entity treeB = registry -> CreateEntity();
+    treeB.Group("obstacles");
+    treeB.AddComponent<TransformComponent>(glm::vec2(400.0, 495.0), glm::vec2(1.0, 1.0), 0.0);
+    treeB.AddComponent<SpriteComponent>("tree-image", 16, 32, 2);
+    treeB.AddComponent<BoxColliderComponent>(16, 32, 0);
+    
     Entity label = registry -> CreateEntity();
     SDL_Color green = {0, 255, 0};
     label.AddComponent<TextLabelComponent>(glm::vec2(windowWidth / 2 - 60, 10), "Game v1.0", "kitchensink_font", green);
@@ -264,6 +277,7 @@ void Game::Update(){
     // Perform subscription events for all systems
     registry -> GetSystem<KeyboardMovementSystem>().SubscribeToEvents(eventBus); 
     registry -> GetSystem<ProjectileEmitSystem>().SubscribeToEvents(eventBus);
+    registry -> GetSystem<MovementSystem>().SubscribeToEvents(eventBus);
     registry -> GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
     
     // Invoke all systems that need to update

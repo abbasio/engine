@@ -5,7 +5,6 @@
 #include "../Components/BoxColliderComponent.h"
 
 #include "../ECS/ECS.h"
-#include "../Logger/Logger.h"
 #include "../EventBus/EventBus.h"
 #include "../Events/CollisionEvent.h"
 class DamageSystem: public System {
