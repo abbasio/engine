@@ -24,23 +24,20 @@ class RenderSystem: public System{
             std::sort(GetSystemEntities().begin(), GetSystemEntities().end(), [](Entity a, Entity b){
                 return a.GetComponent<SpriteComponent>().zIndex < b.GetComponent<SpriteComponent>().zIndex;        
             });
-
-            //for (auto entity: GetSystemEntities()){
-            //    RenderableEntity renderableEntity;
-            //    renderableEntity.transformComponent = entity.GetComponent<TransformComponent>();
-            //    renderableEntity.spriteComponent = entity.GetComponent<SpriteComponent>();
-            //
-            //    renderableEntities.emplace_back(renderableEntity);
-            //
-            //    std::sort(renderableEntities.begin(), renderableEntities.end(), [](const RenderableEntity& a, const RenderableEntity& b){
-            //        return a.spriteComponent.zIndex < b.spriteComponent.zIndex;
-            //    });
-            //}
            
             // Loop all entities that the system is interested in
             for (auto entity: GetSystemEntities()){
                 const auto transform = entity.GetComponent<TransformComponent>();
                 const auto sprite = entity.GetComponent<SpriteComponent>();
+                bool isEntityOutsideCameraView = {
+                    transform.position.x + (transform.scale.x * sprite.width) < camera.x ||
+                    transform.position.x > camera.x + camera.w ||
+                    transform.position.y + (transform.scale.y * sprite.height)< camera.y ||
+                    transform.position.y > camera.y + camera.h    
+                };
+
+                if (isEntityOutsideCameraView && !sprite.isFixed) continue;
+
                 SDL_Texture* texture = assetStore -> GetTexture(sprite.assetId);   
                
                 // Set source rectangle of our original sprite texture
