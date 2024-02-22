@@ -47,7 +47,7 @@ void System::RemoveEntityFromSystem(Entity entity){
     erase(entities, entity);
 }
 
-const vector<Entity>& System::GetSystemEntities() const{
+vector<Entity>& System::GetSystemEntities(){
     return entities;
 }
 

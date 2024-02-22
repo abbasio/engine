@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <SDL2/SDL.h>
 #include "../ECS/ECS.h"
 #include "../Components/TransformComponent.h"
@@ -13,8 +14,29 @@ class RenderSystem: public System{
         }
         
         void Update(SDL_Renderer* renderer, std::unique_ptr<AssetStore>& assetStore, SDL_Rect& camera){
-            // Sort all entities of our system by their z index
+           // Create a vector of sprite and transform components for all entities
+            struct RenderableEntity {
+                TransformComponent transformComponent; 
+                SpriteComponent spriteComponent;
+            };
             
+            std::vector<RenderableEntity> renderableEntities;
+            std::sort(GetSystemEntities().begin(), GetSystemEntities().end(), [](Entity a, Entity b){
+                return a.GetComponent<SpriteComponent>().zIndex < b.GetComponent<SpriteComponent>().zIndex;        
+            });
+
+            //for (auto entity: GetSystemEntities()){
+            //    RenderableEntity renderableEntity;
+            //    renderableEntity.transformComponent = entity.GetComponent<TransformComponent>();
+            //    renderableEntity.spriteComponent = entity.GetComponent<SpriteComponent>();
+            //
+            //    renderableEntities.emplace_back(renderableEntity);
+            //
+            //    std::sort(renderableEntities.begin(), renderableEntities.end(), [](const RenderableEntity& a, const RenderableEntity& b){
+            //        return a.spriteComponent.zIndex < b.spriteComponent.zIndex;
+            //    });
+            //}
+           
             // Loop all entities that the system is interested in
             for (auto entity: GetSystemEntities()){
                 const auto transform = entity.GetComponent<TransformComponent>();

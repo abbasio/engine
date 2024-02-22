@@ -75,7 +75,7 @@ class System{
         
         void AddEntityToSystem(Entity entity);
         void RemoveEntityFromSystem(Entity entity);
-        const vector<Entity>& GetSystemEntities() const;
+        vector<Entity>& GetSystemEntities();
         const Signature& GetComponentSignature() const;
         
         // Defines the component type that entities must have to be considered by the system

@@ -196,7 +196,7 @@ void Game::LoadLevel(int level){
             Entity tile = registry -> CreateEntity();
             tile.Group("tiles");
             tile.AddComponent<TransformComponent>(glm::vec2(tileXPos, tileYPos), glm::vec2(tileScale, tileScale));
-            tile.AddComponent<SpriteComponent>("tileset", tileSize, tileSize, 1, false, srcRectX, srcRectY); 
+            tile.AddComponent<SpriteComponent>("tileset", tileSize, tileSize, 0, false, srcRectX, srcRectY); 
         }
     }
     
@@ -227,7 +227,7 @@ void Game::LoadLevel(int level){
     tank.Group("enemies");
     tank.AddComponent<TransformComponent>(glm::vec2(500.0, 500.0), glm::vec2(1.0, 1.0), 0.0);
     //tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0, 100.0), 2000, 10000, 33);
-    tank.AddComponent<SpriteComponent>("tank-right", 32, 32, 2);
+    tank.AddComponent<SpriteComponent>("tank-right", 32, 32, 1);
     tank.AddComponent<RigidBodyComponent>(glm::vec2(20.0, 0.0));
     tank.AddComponent<BoxColliderComponent>(32, 32, 2);
     tank.AddComponent<HealthComponent>(100);
@@ -235,7 +235,7 @@ void Game::LoadLevel(int level){
     Entity truck = registry -> CreateEntity();
     truck.Group("enemies");
     truck.AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
-    truck.AddComponent<SpriteComponent>("truck-right", 32, 32, 2);
+    truck.AddComponent<SpriteComponent>("truck-right", 32, 32, 1);
     truck.AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0));
     truck.AddComponent<BoxColliderComponent>(32, 32, 2);
     truck.AddComponent<HealthComponent>(100);
@@ -243,13 +243,13 @@ void Game::LoadLevel(int level){
     Entity treeA = registry -> CreateEntity();
     treeA.Group("obstacles");
     treeA.AddComponent<TransformComponent>(glm::vec2(600.0, 495.0), glm::vec2(1.0, 1.0), 0.0);
-    treeA.AddComponent<SpriteComponent>("tree-image", 16, 32, 2);
+    treeA.AddComponent<SpriteComponent>("tree-image", 16, 32, 1);
     treeA.AddComponent<BoxColliderComponent>(16, 32, 0);
     
     Entity treeB = registry -> CreateEntity();
     treeB.Group("obstacles");
     treeB.AddComponent<TransformComponent>(glm::vec2(400.0, 495.0), glm::vec2(1.0, 1.0), 0.0);
-    treeB.AddComponent<SpriteComponent>("tree-image", 16, 32, 2);
+    treeB.AddComponent<SpriteComponent>("tree-image", 16, 32, 1);
     treeB.AddComponent<BoxColliderComponent>(16, 32, 0);
     
     Entity label = registry -> CreateEntity();
