@@ -15,7 +15,18 @@ libs/lua/*
 libs/sol/*
 !libs/sol/.gitkeep
 
-assets/*
-!assets/.gitkeep
+!assets/scripts/
+
+assets/fonts/*
+!assets/fonts/.gitkeep
+
+assets/images/*
+!assets/images/.gitkeep
+
+assets/sounds/*
+!assets/sounds/.gitkeep
+
+assets/tilemaps/*
+!assets/tilemaps/.gitkeep
 
 compile_commands.json 
