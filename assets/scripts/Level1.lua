@@ -57,6 +57,7 @@ Level = {
                 boxcollider = {
                     width = 32,
                     height = 25,
+                    damage_layer = 1,
                     offset = { x = 0, y = 5 }
                 },
                 health = {
@@ -67,13 +68,11 @@ Level = {
                     projectile_duration = 10, -- seconds
                     repeat_frequency = 0, -- seconds
                     hit_percentage_damage = 10,
-                    friendly = true
+                    projectile_damage_layer = 1,
+                    is_auto = false,
                 },
                 keyboard_controller = {
-                    up_velocity = { x = 0, y = -50 },
-                    right_velocity = { x = 50, y = 0 },
-                    down_velocity = { x = 0, y = 50 },
-                    left_velocity = { x = -50, y = 0 }
+                    speed = 50,
                 },
                 camera_follow = {
                     follow = true
@@ -98,6 +97,7 @@ Level = {
                 boxcollider = {
                     width = 25,
                     height = 18,
+                    damage_layer = 2,
                     offset = { x = 0, y = 7 }
                 },
                 health = {
@@ -108,7 +108,7 @@ Level = {
                     projectile_duration = 2, -- seconds
                     repeat_frequency = 1, -- seconds
                     hit_percentage_damage = 20,
-                    friendly = false
+                    projectile_damage_layer = 2,
                 }
             }
         }

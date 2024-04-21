@@ -58,8 +58,8 @@ class ProjectileEmitSystem: public System {
                         projectile.Group("projectiles");
                         projectile.AddComponent<TransformComponent>(projectilePosition, glm::vec2(1.0, 1.0), 0.0);
                         projectile.AddComponent<RigidBodyComponent>(projectileVelocity);
-                        projectile.AddComponent<SpriteComponent>("bullet-image", 4, 4, 4);
-                        projectile.AddComponent<BoxColliderComponent>(4, 4, 1);
+                        projectile.AddComponent<SpriteComponent>("bullet-texture", 4, 4, 4);
+                        projectile.AddComponent<BoxColliderComponent>(4, 4, projectileEmitter.projectileDamageLayer);
                         // Set something on the projectile emitter component to control lifecycle instead of hardcoding
                         projectile.AddComponent<LifecycleComponent>(projectileEmitter.projectileDuration);
                         projectile.AddComponent<DamageComponent>(projectileEmitter.projectileDamage);
@@ -89,8 +89,8 @@ class ProjectileEmitSystem: public System {
                     projectile.Group("projectiles");
                     projectile.AddComponent<TransformComponent>(projectilePosition, glm::vec2(1.0, 1.0), 0.0);
                     projectile.AddComponent<RigidBodyComponent>(projectileEmitter.projectileVelocity);
-                    projectile.AddComponent<SpriteComponent>("bullet-image", 4, 4, 4);
-                    projectile.AddComponent<BoxColliderComponent>(4, 4, 2);
+                    projectile.AddComponent<SpriteComponent>("bullet-texture", 4, 4, 4);
+                    projectile.AddComponent<BoxColliderComponent>(4, 4, projectileEmitter.projectileDamageLayer);
                     // Set something on the projectile emitter component to control lifecycle instead of hardcoding
                     projectile.AddComponent<LifecycleComponent>(projectileEmitter.projectileDuration);
                     projectile.AddComponent<DamageComponent>(projectileEmitter.projectileDamage);

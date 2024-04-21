@@ -168,27 +168,51 @@ void LevelLoader::LoadLevel(sol::state& lua, const std::unique_ptr<Registry>& re
                 }
                
                 if (componentName == "animation") {
-                    // ...handle animation component
+                    int numFrames = component["num_frames"];
+                    int frameRateSpeed = component["speed_rate"];
+                    bool isLoop = component["is_loop"].get_or(false);
+
+                    newEntity.AddComponent<AnimationComponent>(numFrames, frameRateSpeed, isLoop);
                 }
                
                 if (componentName == "boxcollider") {
-                    // ...handle collider component
+                    int width = component["width"];
+                    int height = component["height"];
+                    int damageLayer = component["damage_layer"];
+
+                    int offsetX = component["offset"]["x"];
+                    int offsetY = component["offset"]["y"];
+                    glm::vec2 offset = vec2(offsetX, offsetY);
+
+                    newEntity.AddComponent<BoxColliderComponent>(width, height, damageLayer, offset);
                 }
                
                 if (componentName == "health") {
-                    // ...handle health component
+                    int healthPercentage = component["health_percentage"];
+                    newEntity.AddComponent<HealthComponent>(healthPercentage);
                 }
                
                 if (componentName == "projectile_emitter") {
-                    // ...handle projectile emitter component
+                    int projectileVelocityX = component["projectile_velocity"]["x"];
+                    int projectileVelocityY = component["projectile_velocity"]["y"];
+                    glm::vec2 projectileVelocity = glm::vec2(projectileVelocityX, projectileVelocityY);
+
+                    int projectileFrequency = component["repeat_frequency"].get_or(1) * 1000;
+                    int projectileDuration = component["projectile_duration"].get_or(10) * 1000;
+                    int projectileDamage = component["hit_percentage_damage"].get_or(10);
+                    int projectileDamageLayer = component["projectile_damage_layer"];
+                    bool isAuto = component["is_auto"].get_or(true);
+
+                    newEntity.AddComponent<ProjectileEmitterComponent>(projectileVelocity, projectileFrequency, projectileDuration, projectileDamage, projectileDamageLayer, isAuto);
                 }
                
                 if (componentName == "keyboard_controller") {
-                    // ...handle keyboard controller component
+                    int speed = component["speed"];
+                    newEntity.AddComponent<KeyboardControlComponent>(speed);
                 }
                
                 if (componentName == "camera_follow") {
-                    // ...handle camera component
+                    newEntity.AddComponent<CameraFollowComponent>();
                 }
             }
         }
