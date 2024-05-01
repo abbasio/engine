@@ -186,7 +186,7 @@ void Registry::Update(){
     for (auto entity: entitiesToBeKilled){
         // Remove entity from component pools
         for (auto pool: componentPools) {
-            pool -> RemoveEntityFromPool(entity.GetId());
+            if (pool) pool -> RemoveEntityFromPool(entity.GetId());
         }
 
         RemoveEntityFromSystems(entity);
